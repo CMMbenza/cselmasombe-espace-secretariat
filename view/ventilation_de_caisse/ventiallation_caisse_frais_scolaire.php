@@ -90,6 +90,7 @@ $totalEntre=0.0; $totalDep=0.0; $soldeCumul=0.0; $soldeOuverture=0.0;
       <div class="card-body">
         <h5 class="card-title d-flex justify-content-between">
           <span>Ventilation — Caisse Frais Scolaire</span>
+          <a href="ventiallation_caisse_frais_connexe.php" class="btn btn-dark">Ventiallation caisse frais connexe</a>
           <a href="javascript:history.back()" class="btn btn-light">&lt; Retour</a>
         </h5>
         <hr>
