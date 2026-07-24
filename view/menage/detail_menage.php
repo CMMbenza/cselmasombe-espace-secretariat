@@ -98,12 +98,12 @@ if (!empty($eleves)) {
     FROM eleve e
     JOIN classe cl ON e.classe = cl.id
     JOIN cycle  cy ON cl.cycle  = cy.id
-    JOIN scolarite s2 ON s2.cycle = cy.id AND s2.anneeScolaire = ?
+    JOIN scolarite s2 ON s2.cycle = cy.id
     WHERE e.menage = ?
       AND (LOWER(s2.description) LIKE '%diver%' OR LOWER(s2.description) LIKE '%connex%')
   ";
   $stDR = $con->prepare($sqlDiversRef);
-  $stDR->bind_param('si', $anneeScolaire, $id);
+  $stDR->bind_param('i', $id);
   $stDR->execute();
   $rsDR = $stDR->get_result();
   if ($row = $rsDR->fetch_assoc()) {
@@ -124,14 +124,14 @@ if (!empty($eleves)) {
     FROM eleve e
     JOIN classe cl ON e.classe = cl.id
     JOIN cycle  cy ON cl.cycle  = cy.id
-    JOIN scolarite s ON s.cycle = cy.id AND s.anneeScolaire = ?
+    JOIN scolarite s ON s.cycle = cy.id
     JOIN tranche   t ON t.frais_id = s.id
     WHERE e.menage = ?
     GROUP BY t.numero_tranche
     ORDER BY t.numero_tranche
   ";
   $stAgg = $con->prepare($sqlAgg);
-  $stAgg->bind_param('si', $anneeScolaire, $id);
+  $stAgg->bind_param('i', $id);
   $stAgg->execute();
   $rsAgg = $stAgg->get_result();
   while ($row = $rsAgg->fetch_assoc()) {

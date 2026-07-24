@@ -5,7 +5,7 @@ require_once('annee_scolaire.encours.php');
 /* Helpers */
 function s($k){ return isset($_POST[$k]) ? trim((string)$_POST[$k]) : ''; }
 
-if (isset($_POST['submit'])) {
+if (isset($_POST['submit']) || isset($_POST['submit_continue'])) {
   // ===== CREATION =====
   $noms       = s('noms');
   $telephone  = s('telephone');
@@ -22,11 +22,17 @@ if (isset($_POST['submit'])) {
   $stmt->bind_param("sssssssds", $noms, $telephone, $numero, $avenue, $quartier, $commune, $annee_scolaire, $montantAPayer, $email);
   $stmt->execute();
   $stmt->close();
-  // Reload pour refléter la nouvelle valeur
-    header("Location: ../../view/menage/?$noms");
+  // Reload pour refléter la nouvelle valeur      
+
+    if (isset($_POST['submit_continue'])) {
+      header("Location: ../../view/eleve/create-update.php?$noms");
+    }else {
+      // Reload pour refléter la nouvelle valeur
+      header("Location: ../../view/menage/?$noms");
+    }
     exit;
 
-} elseif (isset($_POST['update'])) {
+} elseif (isset($_POST['update']) || isset($_POST['update_continue'])) {
   // ===== MISE A JOUR =====
   $id         = (int)($_POST['id'] ?? 0);
   if ($id <= 0) { return; }
@@ -53,8 +59,13 @@ if (isset($_POST['submit'])) {
   $stmt->execute();
   $stmt->close();
   
-    // Reload pour refléter la nouvelle valeur
-    header("Location: ../../view/menage/?$noms");
+   if (isset($_POST['update_continue'])) {
+        header("Location: ../../view/eleve/create-update.php?id_menage=" . $id); 
+    }else {
+        // Reload pour refléter la nouvelle valeur
+        header("Location: ../../view/menage/?$noms");
+    }
+
     exit;
 }else {
   if(isset($_GET['id']) && isset($_GET['status'])){

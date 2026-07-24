@@ -97,9 +97,10 @@ if (isset($_POST['submit'])) {
                 set_flash('success', "Paiement enregistré avec succès.");
 
                 // ===== PRG: redirect GET (hard refresh anti-cache) =====
-                $redirectPath = strtok($_SERVER['REQUEST_URI'], '?'); // sans query string
-                $qs = http_build_query(['saved' => 1, '_r' => time()]);
-                header('Location: ' . $redirectPath . '?' . $qs);
+                // $redirectPath = strtok($_SERVER['REQUEST_URI'], '?'); // sans query string
+                // $qs = http_build_query(['saved' => 1, '_r' => time()]);
+                // header('Location: ' . $redirectPath . '?' . $qs);
+                header('Location: autres_frais_supplementaire.php');
                 exit;
 
             } catch (Throwable $e) {

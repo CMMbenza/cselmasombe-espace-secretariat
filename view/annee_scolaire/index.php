@@ -5,7 +5,6 @@ require_once ('../../layouts/navbar/navbar.php');
 
 ?>
 
-
 <div class="main-panel-copy">
     <div class="content-wrapper">
         <div class="row">
@@ -45,65 +44,86 @@ require_once ('../../layouts/navbar/navbar.php');
                             <table class="table">
                                 <thead>
                                     <tr>
-                                        <!-- <th> # </th> -->
                                         <th> Année scolaire </th>
                                         <th> Début de l'année </th>
                                         <th> Fin de l'année </th>
                                         <th> Status </th>
+                                        <th> </th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <?php if ($rst->num_rows <= 0) {
-                                                    ?>
-                                    <div class="alert alert-danger">List vide</div>
-                                    <?php } else {
-                                                        while ($row = $rst->fetch_assoc()) {
-                                                            ?>
-                                    <tr>
-                                        <!-- <td>
-                                                        <?php echo $row['id'];?>
-                                                    </td> -->
-                                        <?php if ($row['status'] == 'Encours') {
-                                                      ?>
-                                        <div class="">
-                                            <td>
-                                                <?php echo $row['annee_scolaire'];?>
-                                            </td>
-                                            <td>
-                                                <?php echo $row['dateDebut'];?>
-                                            </td>
-                                            <td>
-                                                <?php echo $row['dateFin'];?>
-                                            </td>
-                                            <td class="text-success">
-                                                <?php echo $row['status'];?>
-                                        </div>
-                                        <?php
-                                                    } else { ?>
-                                        <div style="color:red !important">
-                                            <td class="text-danger">
-                                                <?php echo $row['annee_scolaire'];?>
-                                            </td>
-                                            <td class="text-danger">
-                                                <?php echo $row['dateDebut'];?>
-                                            </td>
-                                            <td class="text-danger">
-                                                <?php echo $row['dateFin'];?>
-                                            </td>
-                                            <td class="text-danger">
-                                                <?php echo $row['status'];?>
-                                        </div>
-                                        <?php } ?>
 
+                                    <?php if ($rst->num_rows <= 0) { ?>
+
+                                    <tr>
+                                        <td colspan="5">
+                                            <div class="alert alert-danger">
+                                                Liste vide
+                                            </div>
+                                        </td>
+                                    </tr>
+
+                                    <?php } else { ?>
+
+                                    <?php while ($row = $rst->fetch_assoc()) { ?>
+
+                                    <tr>
+
+                                        <td class="<?= ($row['status'] == 'encours') ? '' : 'text-danger' ?>">
+                                            <?= $row['annee_scolaire']; ?>
+                                        </td>
+
+                                        <td class="<?= ($row['status'] == 'encours') ? '' : 'text-danger' ?>">
+                                            <?= $row['dateDebut']; ?>
+                                        </td>
+
+                                        <td class="<?= ($row['status'] == 'encours') ? '' : 'text-danger' ?>">
+                                            <?= $row['dateFin']; ?>
+                                        </td>
+
+                                        <td
+                                            class="<?= ($row['status'] == 'encours') ? 'text-primary' : 'text-danger' ?>">
+                                            <?= $row['status']; ?>
+                                        </td>
+
+
+                                        <td>
+
+                                            <?php if ($row['status'] == 'encours') { ?>
+
+                                            <a href="cloturer_annee.php?id=<?= $row['id']; ?>"
+                                                class="btn btn-danger btn-sm"
+                                                onclick="return confirm('Voulez-vous vraiment clôturer cette année scolaire ? Les données seront archivées.')">
+
+                                                <i class="fa fa-lock"></i>
+                                                Clôturer
+
+                                            </a>
+
+                                            <?php } else { ?>
+
+                                            <span class="badge bg-dark">
+                                                Fermée
+                                            </span>
+
+                                            <a href="ouvrir_consulter_annee.php?id=<?= $row['id'] ?>"
+                                                class="btn btn-sm <?= $row['status'] === 'encours' ? 'btn-success' : 'btn-primary' ?>">
+                                                <?php if ($row['status'] === 'encours'): ?>
+                                                <i class="fas fa-folder-open me-1"></i> Gérer la session
+                                                <?php else: ?>
+                                                <i class="fas fa-eye me-1"></i> Consulter l'archive
+                                                <?php endif; ?>
+                                            </a>
+
+                                            <?php } ?>
 
                                         </td>
-                                        <!-- <td>
-                                                        <button class="btn btn-primary">Modifier</button>
-                                                        <button class="btn btn-danger">Supprimer</button>
-                                                        <button class="btn btn-primary">Voir</button>
-                                                    </td> -->
                                     </tr>
-                                    <?php }} ?>
+
+                                    <?php } ?>
+
+                                    <?php } ?>
+
                                 </tbody>
                             </table>
                         </div>

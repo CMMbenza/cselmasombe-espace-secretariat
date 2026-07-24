@@ -205,12 +205,18 @@ require_once('../../layouts/navbar/navbar.php');
                                 </a>
                             </div>
 
-                            <!-- <div class="col-12 col-md-6 col-lg-3">
+                            <div class="col-12 col-md-6 col-lg-3">
                                 <a class="btn btn-secondary w-100" href="../archivage/">
                                     <span class="menu-icon archive"><i class="mdi mdi-archive"></i></span>
                                     Archivage des données
                                 </a>
-                            </div> -->
+                            </div>
+                            <div class="col-12 col-md-6 col-lg-3">
+                                <a class="btn btn-secondary w-100" href="../archivage/reinscription.php">
+                                    <span class="menu-icon archive"><i class="mdi mdi-archive"></i></span>
+                                    Réinscription
+                                </a>
+                            </div>
 
                         </div>
 

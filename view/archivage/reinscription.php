@@ -1,787 +1,357 @@
-<?php require_once('service/invoice.component.service.php'); 
-      // require_once('../menage/service/menage.service.php');
-      require_once('../classe/service/classe.service.php');
+<?php
+session_start();
+require_once('../../layouts/constants/head.php');
+require_once('../../webapp/database/config.php');
+require_once('../../layouts/navbar/navbar.php');
 
+if (!isset($con) && isset($conn)) { $con = $conn; }
+mysqli_set_charset($con, 'utf8mb4');
 
-      if( !empty( $_POST ) ){
-        try{
-          $data = saveInvoice( $_POST );
-          
-          if( isset($data['success']) && $data['success']){
-            $_SESSION['success'] = 'Invoice Saved Successfully!';
-            header('Location: inscription.php');exit;
-          } else {
-            $_SESSION['success'] = 'Invoice Save failed, try again.';
-          }
-        } catch (Exception $e) {
-          $_SESSION['error'] = $e->getMessage();
-        }
-      }
-      ?>
+/* =====================================================
+   HELPERS
+===================================================== */
+function e($value) {
+    return htmlspecialchars((string)($value ?? ''), ENT_QUOTES, 'UTF-8');
+}
 
-<!DOCTYPE html>
-<html lang="en">
+/* =====================================================
+   RÉCUPÉRATION DE L'ANNÉE SCOLAIRE EN COURS
+===================================================== */
+$annee_active = null;
+$res = mysqli_query($con, "
+    SELECT *
+    FROM annee_scolaire
+    WHERE status='encours'
+    ORDER BY id DESC
+    LIMIT 1
+");
 
-<head>
-    <!-- Required meta tags -->
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title>CS ELMA</title>
-    <!-- plugins:css -->
-    <link rel="stylesheet" href="../../assets/vendors/mdi/css/materialdesignicons.min.css">
-    <link rel="stylesheet" href="../../assets/vendors/ti-icons/css/themify-icons.css">
-    <link rel="stylesheet" href="../../assets/vendors/css/vendor.bundle.base.css">
-    <link rel="stylesheet" href="../../assets/vendors/font-awesome/css/font-awesome.min.css">
-    <!-- endinject -->
-    <!-- Plugin css for this page -->
-    <link rel="stylesheet" href="../../assets/vendors/jvectormap/jquery-jvectormap.css">
-    <link rel="stylesheet" href="../../assets/vendors/flag-icon-css/css/flag-icons.min.css">
-    <link rel="stylesheet" href="../../assets/vendors/owl-carousel-2/owl.carousel.min.css">
-    <link rel="stylesheet" href="../../assets/vendors/owl-carousel-2/owl.theme.default.min.css">
-    <!-- End plugin css for this page -->
-    <!-- inject:css -->
-    <!-- endinject -->
-    <!-- Layout styles -->
-    <link rel="stylesheet" href="../../assets/css/style.css">
-    <!-- End layout styles -->
-    <link rel="shortcut icon" href="assets/images/favicon.png" />
-</head>
+if ($res && mysqli_num_rows($res) > 0) {
+    $annee_active = mysqli_fetch_assoc($res);
+}
 
-<body>
-    <div class="container-scroller">
-        <!-- <div class="row p-0 m-0 proBanner" id="proBanner">
-            <div class="col-md-12 p-0 m-0">
-                <div class="card-body card-body-padding px-3 d-flex align-items-center justify-content-between">
-                    <div class="ps-lg-3">
-                        <div class="d-flex align-items-center justify-content-between">
-                            <p class="mb-0 font-weight-medium me-3 buy-now-text">Free 24/7 customer support, updates,
-                                and more with this template!</p>
-                            <a href="https://www.bootstrapdash.com/product/corona-admin-template/" target="_blank"
-                                class="btn me-2 buy-now-btn border-0">Buy Now</a>
-                        </div>
-                    </div>
-                    <div class="d-flex align-items-center justify-content-between">
-                        <a href="https://www.bootstrapdash.com/product/corona-admin-template/"><i
-                                class="mdi mdi-home me-3 text-white"></i></a>
-                        <button id="bannerClose" class="btn border-0 p-0">
-                            <i class="mdi mdi-close text-white"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div> -->
-        <!-- partial:partials/_sidebar.php -->
-        <nav class="sidebar sidebar-offcanvas" id="sidebar">
-            <div class="sidebar-brand-wrapper d-none d-lg-flex align-items-center justify-content-center fixed-top">
-                <a class="sidebar-brand brand-logo" href="index.php"><img src="../../assets/images/logo.svg"
-                        alt="logo" /></a>
-                <a class="sidebar-brand brand-logo-mini" href="index.php"><img src="../../assets/images/logo-mini.svg"
-                        alt="logo" /></a>
-            </div>
-            <ul class="nav">
-                <li class="nav-item profile">
-                    <div class="profile-desc">
-                        <div class="profile-pic">
-                            <div class="count-indicator">
-                                <img class="img-xs rounded-circle " src="../../assets/images/faces/face15.jpg" alt="">
-                                <span class="count bg-success"></span>
-                            </div>
-                            <div class="profile-name">
-                                <h5 class="mb-0 font-weight-normal">CS ELMA</h5>
-                                <span>Administrateur(trice)</span>
-                            </div>
-                        </div>
-                        <a href="#" id="profile-dropdown" data-bs-toggle="dropdown"><i
-                                class="mdi mdi-dots-vertical"></i></a>
-                        <div class="dropdown-menu dropdown-menu-right sidebar-dropdown preview-list"
-                            aria-labelledby="profile-dropdown">
-                            <a href="#" class="dropdown-item preview-item">
-                                <div class="preview-thumbnail">
-                                    <div class="preview-icon bg-dark rounded-circle">
-                                        <i class="mdi mdi-cog text-primary"></i>
-                                    </div>
-                                </div>
-                                <div class="preview-item-content">
-                                    <p class="preview-subject ellipsis mb-1 text-small">Account settings</p>
-                                </div>
-                            </a>
-                            <div class="dropdown-divider"></div>
-                            <a href="#" class="dropdown-item preview-item">
-                                <div class="preview-thumbnail">
-                                    <div class="preview-icon bg-dark rounded-circle">
-                                        <i class="mdi mdi-onepassword  text-info"></i>
-                                    </div>
-                                </div>
-                                <div class="preview-item-content">
-                                    <p class="preview-subject ellipsis mb-1 text-small">Change Password</p>
-                                </div>
-                            </a>
-                            <div class="dropdown-divider"></div>
-                            <a href="#" class="dropdown-item preview-item">
-                                <div class="preview-thumbnail">
-                                    <div class="preview-icon bg-dark rounded-circle">
-                                        <i class="mdi mdi-calendar-today text-success"></i>
-                                    </div>
-                                </div>
-                                <div class="preview-item-content">
-                                    <p class="preview-subject ellipsis mb-1 text-small">To-do list</p>
-                                </div>
-                            </a>
-                        </div>
-                    </div>
-                </li>
-                <li class="nav-item nav-category">
-                    <span class="nav-link">Navigation</span>
-                </li>
-                <li class="nav-item menu-items">
-                    <a class="nav-link" href="../home/">
-                        <span class="menu-icon">
-                            <i class="mdi mdi-speedometer"></i>
-                        </span>
-                        <span class="menu-title">Dashboard</span>
-                    </a>
-                </li>
-                <li class="nav-item menu-items">
-                    <a class="nav-link" data-bs-toggle="collapse" href="#ui-basic" aria-expanded="false"
-                        aria-controls="ui-basic">
-                        <span class="menu-icon">
-                            <i class="mdi mdi-laptop"></i>
-                        </span>
-                        <span class="menu-title">Gestion des élèves</span>
-                        <i class="menu-arrow"></i>
-                    </a>
-                    <div class="collapse" id="ui-basic">
-                        <ul class="nav flex-column sub-menu">
-                            <li class="nav-item"> <a class="nav-link" href="../eleve/">Info élèves</a></li>
-                            <li class="nav-item"> <a class="nav-link" href="../menage/">Ménage</a></li>
-                            <!-- <li class="nav-item"> <a class="nav-link" href="pages/ui-features/typography.php">Typography</a></li> -->
-                        </ul>
-                    </div>
-                </li>
-                <li class="nav-item menu-items">
-                    <a class="nav-link" data-bs-toggle="collapse" href="#ui-classe" aria-expanded="false"
-                        aria-controls="ui-classe">
-                        <span class="menu-icon">
-                            <i class="mdi mdi-laptop"></i>
-                        </span>
-                        <span class="menu-title">Gestion des classe</span>
-                        <i class="menu-arrow"></i>
-                    </a>
-                    <div class="collapse" id="ui-classe">
-                        <ul class="nav flex-column sub-menu">
-                            <li class="nav-item"> <a class="nav-link" href="../classe/">Info classe</a></li>
-                            <li class="nav-item"> <a class="nav-link" href="../cycle/">Cycle</a></li>
-                            <!-- <li class="nav-item"> <a class="nav-link" href="pages/ui-features/typography.php">Typography</a></li> -->
-                        </ul>
-                    </div>
-                </li>
-                <li class="nav-item menu-items">
-                    <a class="nav-link" href="../fixation_frais/">
-                        <span class="menu-icon">
-                            <i class="mdi mdi-playlist-play"></i>
-                        </span>
-                        <span class="menu-title">Frais scolaire</span>
-                        <i class="menu-arrow"></i>
-                    </a>
-                </li>
-                <!-- <li class="nav-item menu-items">
-            <a class="nav-link" href="pages/tables/basic-table.php">
-              <span class="menu-icon">
-                <i class="mdi mdi-table-large"></i>
-              </span>
-              <span class="menu-title">Tables</span>
-              <i class="menu-arrow"></i>
-            </a>
-          </li>
-          <li class="nav-item menu-items">
-            <a class="nav-link" href="pages/charts/chartjs.php">
-              <span class="menu-icon">
-                <i class="mdi mdi-chart-bar"></i>
-              </span>
-              <span class="menu-title">Charts</span>
-              <i class="menu-arrow"></i>
-            </a>
-          </li>
-          <li class="nav-item menu-items">
-            <a class="nav-link" href="pages/icons/font-awesome.php">
-              <span class="menu-icon">
-                <i class="mdi mdi-contacts"></i>
-              </span>
-              <span class="menu-title">Icons</span>
-              <i class="menu-arrow"></i>
-            </a>
-          </li> -->
-                <li class="nav-item menu-items">
-                    <a class="nav-link" data-bs-toggle="collapse" href="#auth" aria-expanded="false"
-                        aria-controls="auth">
-                        <span class="menu-icon">
-                            <i class="mdi mdi-security"></i>
-                        </span>
-                        <span class="menu-title">Système</span>
-                        <i class="menu-arrow"></i>
-                    </a>
-                    <div class="collapse" id="auth">
-                        <ul class="nav flex-column sub-menu">
-                            <li class="nav-item"> <a class="nav-link" href="../../authenticated/user-management">
-                                    Gestion des
-                                    utilisateurs </a></li>
-                            <li class="nav-item"> <a class="nav-link" href="../annonce/"> Annonce </a></li>
-                            <!-- <li class="nav-item"> <a class="nav-link" href="pages/samples/error-404.php"> 404 </a></li>
-                <li class="nav-item"> <a class="nav-link" href="pages/samples/error-500.php"> 505 </a></li>
-                <li class="nav-item"> <a class="nav-link" href="pages/samples/blank-page.php"> Blank Page </a></li> -->
-                        </ul>
-                    </div>
-                </li>
-                <li class="nav-item menu-items">
-                    <a class="nav-link" href="../../authenticated/logout/">
-                        <span class="menu-icon">
-                            <i class="mdi mdi-file-document"></i>
-                        </span>
-                        <span class="menu-title">Deconnexion</span>
-                    </a>
-                </li>
-            </ul>
-        </nav>
-        <!-- partial -->
-        <div class="container-fluid page-body-wrapper">
-            <!-- partial:partials/_navbar.php -->
-            <nav class="navbar p-0 fixed-top d-flex flex-row">
-                <div class="navbar-brand-wrapper d-flex d-lg-none align-items-center justify-content-center">
-                    <a class="navbar-brand brand-logo-mini" href="index.php"><img
-                            src="../../assets/images/logo-mini.svg" alt="logo" /></a>
-                </div>
-                <div class="navbar-menu-wrapper flex-grow d-flex align-items-stretch">
-                    <button class="navbar-toggler navbar-toggler align-self-center" type="button"
-                        data-toggle="minimize">
-                        <span class="mdi mdi-menu"></span>
-                    </button>
-                    <!-- <ul class="navbar-nav w-100">
-              <li class="nav-item w-100">
-                <form class="nav-link mt-2 mt-md-0 d-none d-lg-flex search">
-                  <input type="text" class="form-control" placeholder="Search products">
-                </form>
-              </li>
-            </ul> -->
-                    <ul class="navbar-nav navbar-nav-right">
-                        <li class="nav-item dropdown d-none d-lg-block">
-                            <a class="nav-link btn btn-success create-new-button bg-success"
-                                href="../annee_scolaire/">Année encours
-                                2024 - 2025</a>
-                            <!-- <div class="dropdown-menu dropdown-menu-end navbar-dropdown preview-list" aria-labelledby="createbuttonDropdown">
-                  <h6 class="p-3 mb-0">Projects</h6>
-                  <div class="dropdown-divider"></div>
-                  <a class="dropdown-item preview-item">
-                    <div class="preview-thumbnail">
-                      <div class="preview-icon bg-dark rounded-circle">
-                        <i class="mdi mdi-file-outline text-primary"></i>
-                      </div>
-                    </div>
-                    <div class="preview-item-content">
-                      <p class="preview-subject ellipsis mb-1">Software Development</p>
-                    </div>
-                  </a>
-                  <div class="dropdown-divider"></div>
-                  <a class="dropdown-item preview-item">
-                    <div class="preview-thumbnail">
-                      <div class="preview-icon bg-dark rounded-circle">
-                        <i class="mdi mdi-web text-info"></i>
-                      </div>
-                    </div>
-                    <div class="preview-item-content">
-                      <p class="preview-subject ellipsis mb-1">UI Development</p>
-                    </div>
-                  </a>
-                  <div class="dropdown-divider"></div>
-                  <a class="dropdown-item preview-item">
-                    <div class="preview-thumbnail">
-                      <div class="preview-icon bg-dark rounded-circle">
-                        <i class="mdi mdi-layers text-danger"></i>
-                      </div>
-                    </div>
-                    <div class="preview-item-content">
-                      <p class="preview-subject ellipsis mb-1">Software Testing</p>
-                    </div>
-                  </a>
-                  <div class="dropdown-divider"></div>
-                  <p class="p-3 mb-0 text-center">See all projects</p>
-                </div> -->
-                        </li>
-                        <!-- <li class="nav-item nav-settings d-none d-lg-block">
-                <a class="nav-link" href="#">
-                  <i class="mdi mdi-view-grid"></i>
-                </a>
-              </li>
-              <li class="nav-item dropdown border-left">
-                <a class="nav-link count-indicator dropdown-toggle" id="messageDropdown" href="#" data-bs-toggle="dropdown" aria-expanded="false">
-                  <i class="mdi mdi-email"></i>
-                  <span class="count bg-success"></span>
-                </a>
-                <div class="dropdown-menu dropdown-menu-end navbar-dropdown preview-list" aria-labelledby="messageDropdown">
-                  <h6 class="p-3 mb-0">Messages</h6>
-                  <div class="dropdown-divider"></div>
-                  <a class="dropdown-item preview-item">
-                    <div class="preview-thumbnail">
-                      <img src="../../../../assets/images/faces/face4.jpg" alt="image" class="rounded-circle profile-pic">
-                    </div>
-                    <div class="preview-item-content">
-                      <p class="preview-subject ellipsis mb-1">Mark send you a message</p>
-                      <p class="text-muted mb-0"> 1 Minutes ago </p>
-                    </div>
-                  </a>
-                  <div class="dropdown-divider"></div>
-                  <a class="dropdown-item preview-item">
-                    <div class="preview-thumbnail">
-                      <img src="../../../../assets/images/faces/face2.jpg" alt="image" class="rounded-circle profile-pic">
-                    </div>
-                    <div class="preview-item-content">
-                      <p class="preview-subject ellipsis mb-1">Cregh send you a message</p>
-                      <p class="text-muted mb-0"> 15 Minutes ago </p>
-                    </div>
-                  </a>
-                  <div class="dropdown-divider"></div>
-                  <a class="dropdown-item preview-item">
-                    <div class="preview-thumbnail">
-                      <img src="../../../../assets/images/faces/face3.jpg" alt="image" class="rounded-circle profile-pic">
-                    </div>
-                    <div class="preview-item-content">
-                      <p class="preview-subject ellipsis mb-1">Profile picture updated</p>
-                      <p class="text-muted mb-0"> 18 Minutes ago </p>
-                    </div>
-                  </a>
-                  <div class="dropdown-divider"></div>
-                  <p class="p-3 mb-0 text-center">4 new messages</p>
-                </div>
-              </li>
-              <li class="nav-item dropdown border-left">
-                <a class="nav-link count-indicator dropdown-toggle" id="notificationDropdown" href="#" data-bs-toggle="dropdown">
-                  <i class="mdi mdi-bell"></i>
-                  <span class="count bg-danger"></span>
-                </a>
-                <div class="dropdown-menu dropdown-menu-end navbar-dropdown preview-list" aria-labelledby="notificationDropdown">
-                  <h6 class="p-3 mb-0">Notifications</h6>
-                  <div class="dropdown-divider"></div>
-                  <a class="dropdown-item preview-item">
-                    <div class="preview-thumbnail">
-                      <div class="preview-icon bg-dark rounded-circle">
-                        <i class="mdi mdi-calendar text-success"></i>
-                      </div>
-                    </div>
-                    <div class="preview-item-content">
-                      <p class="preview-subject mb-1">Event today</p>
-                      <p class="text-muted ellipsis mb-0"> Just a reminder that you have an event today </p>
-                    </div>
-                  </a>
-                  <div class="dropdown-divider"></div>
-                  <a class="dropdown-item preview-item">
-                    <div class="preview-thumbnail">
-                      <div class="preview-icon bg-dark rounded-circle">
-                        <i class="mdi mdi-cog text-danger"></i>
-                      </div>
-                    </div>
-                    <div class="preview-item-content">
-                      <p class="preview-subject mb-1">Settings</p>
-                      <p class="text-muted ellipsis mb-0"> Update dashboard </p>
-                    </div>
-                  </a>
-                  <div class="dropdown-divider"></div>
-                  <a class="dropdown-item preview-item">
-                    <div class="preview-thumbnail">
-                      <div class="preview-icon bg-dark rounded-circle">
-                        <i class="mdi mdi-link-variant text-warning"></i>
-                      </div>
-                    </div>
-                    <div class="preview-item-content">
-                      <p class="preview-subject mb-1">Launch Admin</p>
-                      <p class="text-muted ellipsis mb-0"> New admin wow! </p>
-                    </div>
-                  </a>
-                  <div class="dropdown-divider"></div>
-                  <p class="p-3 mb-0 text-center">See all notifications</p>
-                </div> -->
-                        </li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link" id="profileDropdown" href="#" data-bs-toggle="dropdown">
-                                <div class="navbar-profile">
-                                    <img class="img-xs rounded-circle" src="../../assets/images/faces/face15.jpg"
-                                        alt="">
-                                    <p class="mb-0 d-none d-sm-block navbar-profile-name">CS ELMA</p>
-                                    <i class="mdi mdi-menu-down d-none d-sm-block"></i>
-                                </div>
-                            </a>
-                            <div class="dropdown-menu dropdown-menu-end navbar-dropdown preview-list"
-                                aria-labelledby="profileDropdown">
-                                <h6 class="p-3 mb-0">Profile</h6>
-                                <div class="dropdown-divider"></div>
-                                <a class="dropdown-item preview-item">
-                                    <div class="preview-thumbnail">
-                                        <div class="preview-icon bg-dark rounded-circle">
-                                            <i class="mdi mdi-cog text-success"></i>
-                                        </div>
-                                    </div>
-                                    <div class="preview-item-content">
-                                        <p class="preview-subject mb-1">Settings</p>
-                                    </div>
-                                </a>
-                                <div class="dropdown-divider"></div>
-                                <a class="dropdown-item preview-item">
-                                    <div class="preview-thumbnail">
-                                        <div class="preview-icon bg-dark rounded-circle">
-                                            <i class="mdi mdi-logout text-danger"></i>
-                                        </div>
-                                    </div>
-                                    <div class="preview-item-content">
-                                        <p class="preview-subject mb-1">Log out</p>
-                                    </div>
-                                </a>
-                                <div class="dropdown-divider"></div>
-                                <p class="p-3 mb-0 text-center">Advanced settings</p>
-                            </div>
-                        </li>
-                    </ul>
-                    <button class="navbar-toggler navbar-toggler-right d-lg-none align-self-center" type="button"
-                        data-toggle="offcanvas">
-                        <span class="mdi mdi-format-line-spacing"></span>
-                    </button>
-                </div>
-            </nav>
-            <!-- partial -->
-            <div class="main-panel">
-                <div class="content-wrapper">
-                    <div class="row">
-                        <!-- <div class="col-12 grid-margin">
-                            <div class="card">
-                                <div class="card-body">
-                                    <h3 class="card-title"><span class="menu-icon">
-                                            <i class="mdi mdi-speedometer"></i>
-                                        </span>Elève</h3>
-                                    <h6 class="wrapper-filtrage">Filtrage des données :</h6>
-                                    <div class="d-flex align-items-center justify-content-between">
-                                        <div class="wrapper-entity">
-                                            <a href="create-update.php" class="btn btn-success btn-block enter-btn">Nouveau élève</a>
-                                        </div>
-                                        <input type="text" class="form-control p_input" placeholder="Entrez nom élève">
+/* =====================================================
+   LISTE DES MÉNAGES ARCHIVÉS NON RESTAURÉS
+===================================================== */
+$menages_archive = mysqli_query($con, "
+    SELECT am.*, a.annee_scolaire AS session_nom
+    FROM archive_menage am
+    INNER JOIN archive_session a ON a.id = am.archive_id
+    WHERE am.restaure = 0
+    ORDER BY am.noms ASC
+");
 
-                                    </div>
+/* =====================================================
+   MÉNAGE SÉLECTIONNÉ (VIA CODE_MENAGE) & ÉLÈVES ASSOCIÉS
+===================================================== */
+$menage = null;
+$eleves = [];
 
-                                </div>
-                            </div>
-                        </div> -->
+if (isset($_GET['code_menage']) && !empty(trim($_GET['code_menage']))) {
+    $code_menage = trim($_GET['code_menage']);
 
-                        <div class="col-lg-12 col-sm-12 grid-margin">
-                            <form class="form-horizontal invoice-form" action="<?php echo $_SERVER['PHP_SELF']; ?>"
-                                id="invoice-form" method="post" role="form">
+    // 1. Récupération du ménage archivé par son CODE_MENAGE
+    $stmt = mysqli_prepare($con, "
+        SELECT am.*, a.annee_scolaire AS session_nom 
+        FROM archive_menage am
+        INNER JOIN archive_session a ON a.id = am.archive_id
+        WHERE am.code_menage = ?
+    ");
+    mysqli_stmt_bind_param($stmt, "s", $code_menage);
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
 
-                                <div class="card" name="formMenage" id="formMenage" style="display:block;">
-                                    <div class="card-body">
-                                        <h4 class="card-title mb-4"><button
-                                                class="btn btn-primary btn-block enter-btn me-2" name="" id=""><span
-                                                    class="menu-icon">
-                                                    <i class="mdi mdi-speedometer"></i>
-                                                </span></button>informations de la famille</h4>
-
-
-                                        <div class="row">
-                                            <div class="col-lg-12 col-sm-12">
-                                                <div class="form-group">
-                                                    <label for="exampleInputNomEleve" class="form-label">ID</label>
-                                                    <input type="text" class="form-control" name="id" id="id"
-                                                        placeholder="id ménage">
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="row">
-                                            <div class="col-lg-12 col-sm-12">
-                                                <div class="form-group">
-                                                    <label for="exampleInputNomEleve" class="form-label">Noms</label>
-                                                    <input type="text" class="form-control" name="noms" id="noms"
-                                                        placeholder="Noms ménage">
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <!-- <div class="row">
-                                        <div class="col-lg-12 col-sm-12">
-                                            <div class="form-group">
-                                                <label for="exampleInputNomEleve" class="form-label">Nombre des enfants</label>
-                                                <input type="number" class="form-control" id="exampleInputNomEleve"
-                                                    placeholder="Entrez nombre d'enfants">
-                                            </div>
-                                        </div>
-                                    </div> -->
-                                        <div class="row">
-                                            <div class="col-lg-12 col-sm-12">
-                                                <div class="form-group">
-                                                    <label for="exampleInputNomEleve"
-                                                        class="form-label">Téléphone</label>
-                                                    <input type="tel" class="form-control" name="telephone"
-                                                        id="telephone" placeholder="Entrez le téléphone du titaire">
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <!-- <div class="row">
-                                        <div class="col-lg-6 col-sm-12">
-                                            <div class="form-group">
-                                                <label for="exampleInputNomEleve" class="form-label">Période</label>
-                                                <select class="form-control" name="" id="">
-                                                    <option value="#" disabled selected>Sélectionnez la période</option>
-                                                    <option value="trimestruelle">trimestruelle</option>
-                                                    <option value="F">F</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                    </div> -->
-                                        <div class="row">
-                                            <div class="col-lg-6 col-sm-12">
-                                                <div class="form-group">
-                                                    <label for="exampleInputNomEleve" class="form-label">Avenue</label>
-                                                    <input type="text" class="form-control" name="avenue" id="avenue"
-                                                        placeholder="Entrez nom de l'avenue">
-                                                </div>
-                                            </div>
-                                            <div class="col-lg-6 col-sm-12">
-                                                <div class="form-group">
-                                                    <label for="exampleInputNomEleve" class="form-label">Numèro</label>
-                                                    <input type="text" class="form-control" name="numero" id="numero"
-                                                        placeholder="Entrez le numèro de l'avenue">
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="row">
-                                            <div class="col-lg-6 col-sm-12">
-                                                <div class="form-group">
-                                                    <label for="exampleInputQuartier"
-                                                        class="form-label">Quartier</label>
-                                                    <input type="text" class="form-control" name="quartier"
-                                                        id="quartier" placeholder="Entrez le quartier">
-                                                </div>
-                                            </div>
-                                            <div class="col-lg-6 col-sm-12">
-                                                <div class="form-group">
-                                                    <label for="exampleInputCommune" class="form-label">Commune</label>
-                                                    <input type="text" class="form-control" name="commune" id="commune"
-                                                        placeholder="Entrez nom de la commune">
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <!-- <div class="row">
-                                        <div class="col-lg-12 col-sm-12">
-                                            <div class="form-group">
-                                                <label for="exampleInputNomEleve" class="form-label">prénom</label>
-                                                <input type="text" class="form-control" id="exampleInputNomEleve"
-                                                    placeholder="prénom élève">
-                                            </div>
-                                        </div>
-                                    </div> -->
-
-                                        <!--<button class="btn btn-success btn-block enter-btn" name="next_page" id="next_page"
-                      onclick="showDivProduit(this)">Suivant ></button>
-                     <button type="reset" class="btn btn-secondary btn-block enter-btn" name="" id="">Annuler</button> -->
-                                    </div>
-                                </div>
-
-                                <div class="card" name="formEleve" id="formEleve" style="display:block;">
-                                    <div class="card-body">
-                                        <h4 class="card-title mb-4"><button
-                                                class="btn btn-primary btn-block enter-btn me-2" name="" id=""><span
-                                                    class="menu-icon">
-                                                    <i class="mdi mdi-speedometer"></i>
-                                                </span></button>Gestion d'élève</h4>
-
-
-                                        <div class="row">
-                                            <div class="col-lg-12 col-sm-12">
-                                                <div class="form-group">
-                                                    <label for="exampleInputNomEleve" class="form-label">ID</label>
-                                                    <input type="text" class="form-control" name="eleve_id"
-                                                        id="eleve_id" placeholder="id élève">
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="row">
-                                            <div class="col-lg-12 col-sm-12">
-                                                <div class="form-group">
-                                                    <label for="exampleInputNomEleve" class="form-label">Nom</label>
-                                                    <input type="text" class="form-control" name="nom_eleve"
-                                                        id="nom_eleve" placeholder="Nom élève">
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="row">
-                                            <div class="col-lg-12 col-sm-12">
-                                                <div class="form-group">
-                                                    <label for="exampleInputNomEleve" class="form-label">post
-                                                        nom</label>
-                                                    <input type="text" class="form-control" name="postnom" id="postnom"
-                                                        placeholder="post nom élève">
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="row">
-                                            <div class="col-lg-12 col-sm-12">
-                                                <div class="form-group">
-                                                    <label for="exampleInputNomEleve" class="form-label">prénom</label>
-                                                    <input type="text" class="form-control" name="prenom" id="prenom"
-                                                        placeholder="prénom élève">
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="row">
-                                            <div class="col-lg-6 col-sm-12">
-                                                <div class="form-group">
-                                                    <label for="exampleInputNomEleve" class="form-label">Genre</label>
-                                                    <select class="form-control" name="genre" id="genre">
-                                                        <option value="#" disabled selected>Sélectionnez genre</option>
-                                                        <option value="M">M</option>
-                                                        <option value="F">F</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="row">
-                                            <div class="col-lg-6 col-sm-12">
-                                                <div class="form-group">
-                                                    <label for="exampleInputNomEleve" class="form-label">Lieu / date de
-                                                        naissance</label>
-                                                    <input type="text" class="form-control" name="lieuDeNaissance"
-                                                        id="lieuDeNaissance" placeholder="Lieu de naissance">
-                                                </div>
-                                            </div>
-                                            <div class="col-lg-6 col-sm-12">
-                                                <div class="form-group">
-                                                    <label for="exampleInputNomEleve" class="form-label"> </label>
-                                                    <input type="date" class="form-control" name="dateDeNaissance"
-                                                        id="dateDeNaissance" placeholder="Date de naissance">
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="row">
-                                            <div class="form-group col-lg-12 d-flex align-items-center">
-                                                <input type="text" class="form-control file-upload-info" disabled=""
-                                                    placeholder="Téléverser l'Image">
-                                                <span class="input-group-append ms-2">
-                                                    <button class="file-upload-browse btn btn-primary"
-                                                        type="button">Upload</button>
-                                                </span>
-                                            </div>
-                                        </div>
-                                        <!-- <div class="row">
-                                        <div class="col-lg-12 col-sm-12">
-                                            <div class="form-group">
-                                                <label for="exampleInputNomEleve" class="form-label">prénom</label>
-                                                <input type="text" class="form-control" id="exampleInputNomEleve"
-                                                    placeholder="prénom élève">
-                                            </div>
-                                        </div>
-                                    </div> -->
-                                    </div>
-                                </div>
-
-                                <div class="card" name="formClasse" id="formClasse" style="display:block;">
-                                    <div class="card-body">
-                                        <div class="row">
-                                            <div class="form-group col-lg-12">
-                                                <label for="exampleInputClasse" class="form-label">Classe</label>
-                                                <div class="d-flex align-items-center">
-                                                    <select class="form-control" name="classe" id="classe">
-                                                        <option value="#" disabled selected>Définir la classe de
-                                                            l'élève</option>
-                                                        <?php while ($row_classe = $rsts->fetch_assoc()) {
-                                                            ?>
-                                                        <option value="<?php echo $row_classe['id'];?>">
-                                                            <?php echo $row_classe['description'];?>
-                                                            <?php echo $row_classe['cycle'];?>
-                                                        </option>
-                                                        <?php } ?>
-                                                    </select>
-                                                    <span class="input-group-append ms-2">
-                                                        <a href="../classe/create-update.php"
-                                                            class="file-upload-browse btn btn-primary"
-                                                            type="button">Ajouter</a>
-                                                    </span>
-                                                </div>
-
-                                            </div>
-                                        </div>
-
-                                        <div class="row">
-                                            <div class="col-lg-12 col-sm-12">
-                                                <div class="form-group">
-                                                    <label for="exampleInputFraisScolaire" class="form-label">Frais
-                                                        scolare</label>
-                                                    <input type="number" class="form-control" name="frais_scolaire"
-                                                        id="frais_scolaire" placeholder="Frais scolaire">
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <button type="submit" class="btn btn-primary btn-validation addRow me-2"
-                                            data-loading-text="Saving Invoice..." name="invoice_btn"
-                                            style="width:300px">
-                                            <i class="fa fa-floppy-o"></i>
-                                            <span>valider</span>
-                                        </button>
-
-                                        <div class="mt-2"><button class="btn btn-success btn-block enter-btn"
-                                                name="submit" id="submit">Sauvegarder</button>
-                                            <button type="reset" class="btn btn-secondary btn-block enter-btn" name=""
-                                                id="">Annuler</button>
-                                        </div>
-                                    </div>
-                                </div>
-                        </div>
-
-                        </form>
-                    </div>
-
-                </div>
-                <!-- content-wrapper ends -->
-                <!-- partial:partials/_footer.php -->
-                <footer class="footer">
-                    <div class="d-sm-flex justify-content-center justify-content-sm-between">
-                        <span class="text-muted text-center text-sm-left d-block d-sm-inline-block">Année scolaire
-                            $annee_scolaire <a href="https://www.bootstrapdash.com/" target="_blank">BootstrapDash</a>.
-                            All rights
-                            reserved.</span>
-                        <span class="text-muted float-none float-sm-end d-block mt-1 mt-sm-0 text-center"> <span
-                                class="text-muted float-none float-sm-end d-block mt-1 mt-sm-0 text-center">Hand-crafted
-                                & made with <i class="mdi mdi-heart text-danger"></i></span> <i
-                                class="mdi mdi-heart text-danger"></i></span>
-                    </div>
-                </footer>
-                <!-- partial -->
-            </div>
-            <!-- main-panel ends -->
-        </div>
-        <!-- page-body-wrapper ends -->
-    </div>
-    <!-- container-scroller -->
-    <!-- plugins:js -->
-    <script src="../../assets/vendors/js/vendor.bundle.base.js"></script>
-    <!-- endinject -->
-    <!-- Plugin js for this page -->
-    <script src="../../assets/vendors/chart.js/chart.umd.js"></script>
-    <script src="../../assets/vendors/progressbar.js/progressbar.min.js"></script>
-    <script src="../../assets/vendors/jvectormap/jquery-jvectormap.min.js"></script>
-    <script src="../../assets/vendors/jvectormap/jquery-jvectormap-world-mill-en.js"></script>
-    <script src="../../assets/vendors/owl-carousel-2/owl.carousel.min.js"></script>
-    <script src="../../assets/js/jquery.cookie.js" type="text/javascript"></script>
-    <!-- End plugin js for this page -->
-    <!-- inject:js -->
-    <script src="../../assets/js/off-canvas.js"></script>
-    <script src="../../assets/js/misc.js"></script>
-    <script src="../../assets/js/settings.js"></script>
-    <script src="../../assets/js/todolist.js"></script>
-    <!-- endinject -->
-    <!-- Custom js for this page -->
-    <script src="../../assets/js/proBanner.js"></script>
-    <script src="../../assets/js/dashboard.js"></script>
-    <!-- End custom js for this page -->
-
-    <script>
-    function showDivProduit(select) {
-        document.getElementById('formEleve').style.display = "block";
-        document.getElementById('formMenage').style.display = "none";
+    if ($result && mysqli_num_rows($result) > 0) {
+        $menage = mysqli_fetch_assoc($result);
     }
-    </script>
-</body>
+    mysqli_stmt_close($stmt);
 
-</html>
+    // 2. Récupération des élèves où la colonne 'menage' correspond au CODE_MENAGE
+    if ($menage) {
+        $stmt_eleves = mysqli_prepare($con, "
+            SELECT * 
+            FROM archive_eleve 
+            WHERE menage = ? AND (restaure = 0 OR restaure IS NULL)
+            ORDER BY nom, postnom, prenom ASC
+        ");
+        mysqli_stmt_bind_param($stmt_eleves, "s", $menage['code_menage']);
+        mysqli_stmt_execute($stmt_eleves);
+        $resEleve = mysqli_stmt_get_result($stmt_eleves);
+
+        while ($row = mysqli_fetch_assoc($resEleve)) {
+            $eleves[] = $row;
+        }
+        mysqli_stmt_close($stmt_eleves);
+    }
+}
+?>
+
+<div class="main-panel-copy">
+    <div class="content-wrapper">
+        <div class="row">
+            <div class="col-12 grid-margin">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+
+                        <h3 class="card-title text-dark font-weight-bold mb-4">
+                            <i class="fa fa-refresh text-warning mr-2"></i>
+                            Réinscription par Ménage Archivé
+                        </h3>
+
+                        <!-- MESSAGES DE NOTIFICATION -->
+                        <?php if (isset($_SESSION['success'])): ?>
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <i class="fa fa-check-circle mr-2"></i><?= $_SESSION['success']; ?>
+                        </div>
+                        <?php unset($_SESSION['success']); endif; ?>
+
+                        <?php if (isset($_SESSION['error'])): ?>
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="fa fa-exclamation-triangle mr-2"></i><?= $_SESSION['error']; ?>
+                        </div>
+                        <?php unset($_SESSION['error']); endif; ?>
+
+                        <!-- =====================================================
+                             SÉLECTION DU MÉNAGE (PAR CODE_MENAGE)
+                        ===================================================== -->
+                        <div class="bg-light p-4 rounded mb-4 border">
+                            <form method="GET" action="">
+                                <div class="row align-items-end">
+                                    <div class="col-md-8">
+                                        <label class="form-label font-weight-bold text-dark">
+                                            <i class="fa fa-search mr-1"></i> Sélectionner un ménage à réinscrire :
+                                        </label>
+                                        <select name="code_menage" class="form-control form-select shadow-sm"
+                                            onchange="this.form.submit()" style="height: 45px;">
+                                            <option value="">-- Sélectionner un ménage --</option>
+                                            <?php while ($m = mysqli_fetch_assoc($menages_archive)): ?>
+                                            <option value="<?= e($m['code_menage']); ?>"
+                                                <?= (isset($_GET['code_menage']) && $_GET['code_menage'] === $m['code_menage']) ? 'selected' : '' ?>>
+                                                Code: <?= e($m['code_menage']); ?> | <?= e($m['noms']); ?> — Tél:
+                                                <?= e($m['telephone']); ?> (Session: <?= e($m['session_nom']); ?>)
+                                            </option>
+                                            <?php endwhile; ?>
+                                        </select>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+
+                        <?php if ($menage): ?>
+                        <hr class="my-4">
+
+                        <!-- =====================================================
+                             1. FICHE DU MÉNAGE ARCHIVÉ
+                        ===================================================== -->
+                        <div class="card border-left-primary shadow-sm mb-4"
+                            style="border-left: 5px solid #4e73df; background-color: #f8f9fc;">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h5 class="text-primary font-weight-bold mb-0">
+                                        <i class="fa fa-home mr-2"></i> Fiche du Ménage Archivé
+                                        #<?= e($menage['code_menage']); ?>
+                                    </h5>
+                                    <span
+                                        class="badge badge-<?= ($menage['STATUS'] === 'actif') ? 'success' : 'danger'; ?> px-3 py-2">
+                                        Statut : <?= strtoupper(e($menage['STATUS'])); ?>
+                                    </span>
+                                </div>
+
+                                <div class="row text-dark">
+                                    <!-- Identité & Contact -->
+                                    <div class="col-md-4 mb-3">
+                                        <small class="text-muted font-weight-bold d-block text-uppercase">Responsable /
+                                            Nom :</small>
+                                        <strong style="font-size: 1.1rem;"><?= e($menage['noms']); ?></strong>
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <small class="text-muted font-weight-bold d-block text-uppercase">Téléphone
+                                            :</small>
+                                        <i
+                                            class="fa fa-phone text-secondary mr-1"></i><strong><?= e($menage['telephone']); ?></strong>
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <small class="text-muted font-weight-bold d-block text-uppercase">Adresse Email
+                                            :</small>
+                                        <span><?= !empty($menage['email']) ? e($menage['email']) : '<em class="text-muted">Non renseignée</em>'; ?></span>
+                                    </div>
+
+                                    <!-- Adresse Civile -->
+                                    <div class="col-md-8 mb-3">
+                                        <small class="text-muted font-weight-bold d-block text-uppercase">Adresse
+                                            Complète :</small>
+                                        <i class="fa fa-map-marker text-danger mr-1"></i>
+                                        N° <?= e($menage['numero']); ?>, Av. <?= e($menage['avenue']); ?>, Quartier
+                                        <?= e($menage['quartier']); ?>, Commune de <?= e($menage['commune']); ?>
+                                    </div>
+
+                                    <!-- Informations d'Archivage -->
+                                    <div class="col-md-4 mb-3">
+                                        <small class="text-muted font-weight-bold d-block text-uppercase">Session &
+                                            Année d'archive :</small>
+                                        <span class="badge badge-info p-2 font-weight-bold">
+                                            <?= e($menage['session_nom']); ?> (<?= e($menage['annee_archive']); ?>)
+                                        </span>
+                                    </div>
+
+                                    <!-- Données Financières -->
+                                    <div class="col-md-4 mb-2">
+                                        <small class="text-muted font-weight-bold d-block text-uppercase">Montant
+                                            Archivé ($) :</small>
+                                        <strong class="text-primary"
+                                            style="font-size: 1rem;"><?= number_format((float)$menage['montantAPayer'], 2, ',', ' '); ?>
+                                            $</strong>
+                                    </div>
+                                    <div class="col-md-4 mb-2">
+                                        <small class="text-muted font-weight-bold d-block text-uppercase">Montant
+                                            Archivé ($) :</small>
+                                        <strong class="text-primary"
+                                            style="font-size: 1rem;"><?= number_format((float)$menage['montantAPayerFC'], 2, ',', ' '); ?>
+                                            $</strong>
+                                    </div>
+                                    <div class="col-md-4 mb-2">
+                                        <small class="text-muted font-weight-bold d-block text-uppercase">Date
+                                            d'archivage :</small>
+                                        <small class="text-dark"><i
+                                                class="fa fa-clock-o mr-1"></i><?= date('d/m/Y H:i', strtotime($menage['date_archivage'])); ?></small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- =====================================================
+                             2. LISTE DES ENFANTS RATTACHÉS
+                        ===================================================== -->
+                        <div class="mt-4 mb-4">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 class="text-primary font-weight-bold mb-0">
+                                    <i class="fa fa-graduation-cap mr-2"></i> Élève(s) rattaché(s) au ménage Code :
+                                    <?= e($menage['code_menage']); ?>
+                                </h5>
+                                <span class="badge badge-secondary p-2">Total : <?= count($eleves); ?> enfant(s)</span>
+                            </div>
+
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th class="text-center" style="width: 50px;">ID</th>
+                                            <th>Nom Complet</th>
+                                            <th class="text-center">Genre</th>
+                                            <th class="text-center">Lieu & Date de Naissance</th>
+                                            <th class="text-center">Classe Archivée</th>
+                                            <th class="text-right">Frais scolaire</th>
+                                            <th class="text-right">Frais connexe</th>
+                                            <th class="text-center">Créé par</th>
+                                            <th class="text-center">Statut</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php if (empty($eleves)): ?>
+                                        <tr>
+                                            <td colspan="8" class="text-center text-muted font-italic py-4">
+                                                <i class="fa fa-info-circle mr-1"></i> Aucun élève trouvé pour le ménage
+                                                Code : <strong><?= e($menage['code_menage']); ?></strong>.
+                                            </td>
+                                        </tr>
+                                        <?php else: ?>
+                                        <?php foreach ($eleves as $e): ?>
+                                        <tr>
+                                            <!-- ID Eleve -->
+                                            <td class="text-center">
+                                                #<?= e($e['id']); ?>
+                                            </td>
+
+                                            <!-- Nom Complet -->
+                                            <td class="">
+                                                <?= e($e['nom']); ?> <?= e($e['postnom']); ?> <?= e($e['prenom']); ?>
+                                            </td>
+
+                                            <!-- Genre -->
+                                            <td class="text-center">
+                                                <?php if (strtoupper($e['genre']) === 'M'): ?>
+                                                <span class="badge badge-pill badge-info px-2 py-1"><i
+                                                        class="fa fa-mars mr-1"></i>Garçon</span>
+                                                <?php else: ?>
+                                                <span class="badge badge-pill badge-danger px-2 py-1"><i
+                                                        class="fa fa-venus mr-1"></i>Fille</span>
+                                                <?php endif; ?>
+                                            </td>
+
+                                            <!-- Lieu & Date de Naissance -->
+                                            <td class="text-center small">
+                                                <i
+                                                    class="fa fa-calendar text-secondary mr-1"></i><?= date('d/m/Y', strtotime($e['dateDeNaissance'])); ?><br>
+                                                <span class="text-muted"><i class="fa fa-map-marker mr-1"></i>à
+                                                    <?= e($e['lieu']); ?></span>
+                                            </td>
+
+                                            <!-- Classe -->
+                                            <td class="text-center">
+                                                <span class="badge badge-dark px-3 py-2 font-weight-bold">
+                                                    Classe <?= e($e['classe']); ?>
+                                                </span>
+                                            </td>
+
+                                            <!-- Montant à Payer frais scolaire-->
+                                            <td class="text-right font-weight-bold text-primary">
+                                                <?= number_format((float)$e['montant_a_payer'], 2, ',', ' '); ?> $
+                                            </td>
+
+                                            <!-- Montant à Payer Frais connexe-->
+                                            <td class="text-right font-weight-bold text-primary">
+                                                <?= number_format((float)$e['montantAPayerFC'], 2, ',', ' '); ?> $
+                                            </td>
+
+                                            <!-- Créateur -->
+                                            <td class="text-center small">
+                                                <span
+                                                    class="d-block font-weight-bold text-dark"><?= e($e['createdby']); ?></span>
+                                                <span
+                                                    class="text-muted"><?= date('d/m/Y', strtotime($e['dateCreated'])); ?></span>
+                                            </td>
+
+                                            <!-- Statut -->
+                                            <td class="text-center">
+                                                <span
+                                                    class="badge badge-<?= ($e['STATUS'] === 'actif') ? 'success' : 'danger'; ?> px-2 py-1">
+                                                    <?= ucfirst(e($e['STATUS'])); ?>
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        <?php endforeach; ?>
+                                        <?php endif; ?>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- =====================================================
+                             3. ACTION DE RÉINSCRIPTION
+                        ===================================================== -->
+                        <div class="d-flex justify-content-between align-items-center bg-light p-3 rounded border">
+                            <span class="text-dark">
+                                <i class="fa fa-info-circle text-info mr-1"></i> La réinscription restaurera la famille
+                                <strong><?= e($menage['noms']); ?></strong> (Code: <?= e($menage['code_menage']); ?>)
+                                ainsi que ses enfants pour la nouvelle année.
+                            </span>
+                            <form method="POST" action="service/create.update.service.php">
+                                <input type="hidden" name="action" value="restaurer_menage">
+                                <input type="hidden" name="code_menage" value="<?= e($menage['code_menage']); ?>">
+                                <button class="btn btn-success font-weight-bold shadow-sm px-4 py-2"
+                                    name="btn_restaurer" type="submit">
+                                    <i class="fa fa-check-circle mr-1"></i> Valider la Réinscription du Ménage
+                                </button>
+                            </form>
+                        </div>
+
+                        <?php endif; ?>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<?php require_once('../../layouts/constants/footer.php'); ?>

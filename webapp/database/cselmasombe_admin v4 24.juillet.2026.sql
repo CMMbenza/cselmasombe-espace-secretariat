@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Hôte : localhost:3306
--- Généré le : dim. 19 juil. 2026 à 17:37
+-- Généré le : ven. 24 juil. 2026 à 12:18
 -- Version du serveur : 8.0.43-cll-lve
 -- Version de PHP : 8.4.22
 
@@ -34,7 +34,7 @@ CREATE TABLE `affectation_prof_classe` (
   `cours_id` int NOT NULL,
   `date_affect` date NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
-) ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 
 --
 -- Déchargement des données de la table `affectation_prof_classe`
@@ -349,7 +349,7 @@ CREATE TABLE `agent` (
   `service` enum('PRIM & MAT','SEC & HUM','DIR & ADM') COLLATE utf8mb3_bin NOT NULL,
   `dateEmbauche` date DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
-) ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 
 --
 -- Déchargement des données de la table `agent`
@@ -392,7 +392,7 @@ CREATE TABLE `annee_scolaire` (
   `dateDebut` date NOT NULL,
   `dateFin` date NOT NULL,
   `status` enum('encours','fin') COLLATE utf8mb3_bin NOT NULL
-) ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 
 --
 -- Déchargement des données de la table `annee_scolaire`
@@ -442,7 +442,7 @@ CREATE TABLE `appel` (
   `anneeScolaire` varchar(10) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin DEFAULT NULL,
   `created_by` int DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
-) ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 
 --
 -- Déchargement des données de la table `appel`
@@ -677,7 +677,7 @@ CREATE TABLE `appel_detail` (
   `statut` enum('present','absent') CHARACTER SET utf8mb3 COLLATE utf8mb3_bin NOT NULL DEFAULT 'present',
   `remarque` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
-) ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 
 --
 -- Déchargement des données de la table `appel_detail`
@@ -6703,7 +6703,7 @@ CREATE TABLE `balance` (
   `dateBalance` date NOT NULL,
   `anneeScolaire` varchar(10) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
-) ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 
 --
 -- Déchargement des données de la table `balance`
@@ -9332,7 +9332,7 @@ CREATE TABLE `classe` (
   `dateCreaty` date NOT NULL,
   `dateUpdate` date NOT NULL,
   `createdby` varchar(25) COLLATE utf8mb3_bin NOT NULL
-) ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 
 --
 -- Déchargement des données de la table `classe`
@@ -9371,7 +9371,7 @@ CREATE TABLE `cours` (
   `intitule` varchar(100) COLLATE utf8mb3_bin NOT NULL,
   `classe_id` int NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
-) ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 
 --
 -- Déchargement des données de la table `cours`
@@ -9657,7 +9657,7 @@ CREATE TABLE `cours_points_examens` (
   `created_by` int DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NULL DEFAULT NULL
-) ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 
 -- --------------------------------------------------------
 
@@ -9934,7 +9934,7 @@ CREATE TABLE `cycle` (
   `dateCreaty` date NOT NULL,
   `dateUpdate` date NOT NULL,
   `createby` varchar(25) COLLATE utf8mb3_bin NOT NULL
-) ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 
 --
 -- Déchargement des données de la table `cycle`
@@ -9963,7 +9963,7 @@ CREATE TABLE `depenses` (
   `dateUpdate` date NOT NULL,
   `createdby` text COLLATE utf8mb3_bin NOT NULL,
   `anneeScolaire` varchar(10) COLLATE utf8mb3_bin NOT NULL
-) ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 
 --
 -- Déchargement des données de la table `depenses`
@@ -10372,7 +10372,7 @@ CREATE TABLE `eleve` (
   `createdby` varchar(25) COLLATE utf8mb3_bin NOT NULL,
   `montant_a_payer` double(10,2) NOT NULL,
   `STATUS` enum('actif','inactif') COLLATE utf8mb3_bin NOT NULL DEFAULT 'actif'
-) ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 
 --
 -- Déchargement des données de la table `eleve`
@@ -10736,8 +10736,8 @@ INSERT INTO `eleve` (`id`, `nom`, `postnom`, `prenom`, `genre`, `lieu`, `dateDeN
 (802, 'KHENDA', 'DIAZEY', 'GODWIN', 'M', 'KINSHASA', '2014-12-11', 9, 385, '2025-09-16', '2025-09-16', '2025-2026', 'Administrateur(trice)', 400.00, 'inactif'),
 (803, 'MWIKA', 'MUKEKWA', 'BENEJA', 'F', 'KINSHASA', '2014-03-05', 9, 386, '2025-09-16', '2025-09-16', '2025-2026', 'Administrateur(trice)', 400.00, 'actif'),
 (804, 'LOMBE', 'OKELE', 'HENRI', 'F', 'KINSHASA', '2021-08-29', 3, 387, '2025-09-17', '2025-09-17', '2025-2026', 'Administrateur(trice)', 400.00, 'actif'),
-(805, 'MPATA', 'TSHUNZA', 'ASSAELLE', 'M', 'KINSHASA', '2021-03-04', 3, 388, '2025-09-17', '2025-09-17', '2025-2026', 'Administrateur(trice)', 400.00, 'inactif'),
-(806, 'MULANGA', 'TSHUNZA', 'ABIBAELLE', 'F', 'KINSHASA', '2022-03-20', 2, 388, '2025-09-17', '2025-09-17', '2025-2026', 'Administrateur(trice)', 400.00, 'inactif'),
+(805, 'MPATA', 'TSHUNZA', 'ASSAELLE', 'M', 'KINSHASA', '2021-03-04', 3, 388, '2025-09-17', '2025-09-17', '2025-2026', 'Administrateur(trice)', 400.00, 'actif'),
+(806, 'MULANGA', 'TSHUNZA', 'ABIBAELLE', 'F', 'KINSHASA', '2022-03-20', 2, 388, '2025-09-17', '2025-09-17', '2025-2026', 'Administrateur(trice)', 400.00, 'actif'),
 (807, 'MUKANGA', 'MUKANGA', 'JOCELYNE', 'F', 'KINSHASA', '2022-01-31', 2, 389, '2025-09-17', '2025-09-17', '2025-2026', 'Administrateur(trice)', 400.00, 'actif'),
 (808, 'BOSKO', 'MBOKA', 'DJEZY', 'M', 'KINSHASA', '2017-02-04', 6, 390, '2025-09-17', '2025-09-17', '2025-2026', 'Administrateur(trice)', 400.00, 'actif'),
 (809, 'SAMBOLO', 'OMALOHEMBE', 'DORCAS', 'F', 'KINSHASA', '2013-05-25', 8, 391, '2025-09-17', '2025-09-17', '2025-2026', 'Administrateur(trice)', 400.00, 'actif'),
@@ -10839,7 +10839,10 @@ INSERT INTO `inscriptions` (`id`, `responsable_id`, `code_famille`, `nom`, `post
 (9, 18, 'FAM20260003', 'NGOMA ', 'MBENZA ', 'Chris ', 'Kinshasa ', '2026-07-06', 'M', '4ème Primaire', '', 'CS ELMA SOMBE ', '2026-2027', 'EN_ATTENTE', '2026-07-09 13:25:13'),
 (10, 18, 'FAM20260003', 'mbumba ', 'Mbenza ', 'Miriam ', 'Kinshasa ', '2026-07-06', 'F', '2ème Humanité', 'Pédagogie', 'CS ELMA SOMBE ', '2026-2027', 'EN_ATTENTE', '2026-07-09 13:25:13'),
 (11, 19, 'FAM20260004', 'MPUTU ', 'OKENGE', 'Hussein ', 'KINSHASA ', '2015-06-25', 'M', '7ème EB', '', 'C.S ELMA SOMBE ', '2026-2027', 'EN_ATTENTE', '2026-07-09 15:45:13'),
-(12, 20, 'FAM20260005', 'MPUTU ', 'OKENGE', 'Hussein ', 'KINSHASA ', '2015-06-25', 'M', '7ème EB', '', 'C.S ELMA SOMBE ', '2026-2027', 'EN_ATTENTE', '2026-07-09 15:47:17');
+(12, 20, 'FAM20260005', 'MPUTU ', 'OKENGE', 'Hussein ', 'KINSHASA ', '2015-06-25', 'M', '7ème EB', '', 'C.S ELMA SOMBE ', '2026-2027', 'EN_ATTENTE', '2026-07-09 15:47:17'),
+(13, 21, 'FAM20260006', 'Odia', 'MUAMBA', 'GEMIMA', 'Kin', '2026-07-20', 'M', '1ère Primaire', 'Mécanique', 'Collègues belgo congolais', '2026-2027', 'EN_ATTENTE', '2026-07-20 11:04:01'),
+(14, 22, 'FAM20260007', 'SALUMU', 'BOLAMBA', 'Festus', 'Kinshasa', '2021-04-25', 'M', '1ère Primaire', '', 'LYCÉE MADAME DE SÉVIGNÉ ', '2026-2027', 'EN_ATTENTE', '2026-07-23 21:54:00'),
+(15, 22, 'FAM20260007', 'SALUMU', 'ELONGA ', 'Zion', 'Kinshasa', '2023-04-26', 'M', '2ème Maternelle', '', '', '2026-2027', 'EN_ATTENTE', '2026-07-23 21:54:00');
 
 -- --------------------------------------------------------
 
@@ -10864,7 +10867,7 @@ CREATE TABLE `menage` (
   `STATUS` enum('actif','inactif') COLLATE utf8mb3_bin NOT NULL DEFAULT 'actif',
   `start_tranche` int DEFAULT '1',
   `password` text COLLATE utf8mb3_bin NOT NULL
-) ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 
 --
 -- Déchargement des données de la table `menage`
@@ -11110,7 +11113,7 @@ INSERT INTO `menage` (`id`, `noms`, `telephone`, `numero`, `avenue`, `quartier`,
 (385, 'KHENDA', '0824343912', '48', 'AIR-CONGO', 'FUNA', 'LIMETE', '2025-09-16', '2025-09-22', 'Administrateur(trice)', '2025-2026', 800.00, NULL, 'inactif', 1, ''),
 (386, 'MUKEKWA', '0979892460', '0000', 'AIR-CONGO', 'FUNA', 'LIMETE', '2025-09-16', '2025-09-16', 'Administrateur(trice)', '2025-2026', 400.00, NULL, 'actif', 1, ''),
 (387, 'LOMBE PRINCE', '0998305642', '26', 'FORGERON', 'FUNA', 'LIMETE', '2025-09-17', '2025-09-17', 'Administrateur(trice)', '2025-2026', 400.00, NULL, 'actif', 1, ''),
-(388, 'MPATA', '0815004989', '2', 'GWADO', 'FORGERON', 'LIMETE', '2025-09-17', '2025-09-17', 'Administrateur(trice)', '2025-2026', 800.00, 'eddyciunza89@gmail.com', 'inactif', 1, ''),
+(388, 'MPATA', '0815004989', '2', 'GWADO', 'FORGERON', 'LIMETE', '2025-09-17', '2025-09-17', 'Administrateur(trice)', '2025-2026', 800.00, 'eddyciunza89@gmail.com', 'actif', 1, ''),
 (389, 'MUKANGA', '0987810460', '07', 'MBANDAKA', 'FUNA', 'LIMETE', '2025-09-17', '2025-09-17', 'Administrateur(trice)', '2025-2026', 400.00, NULL, 'actif', 1, ''),
 (390, 'BOSOKO YANICK', '0840278102', '1637', 'MILITANT', 'FUNA', 'BARUMBU', '2025-09-17', '2025-09-17', 'Administrateur(trice)', '2025-2026', 400.00, NULL, 'actif', 1, ''),
 (391, 'OMALOHEMBE', '0816577941', '28', 'REPUBLIQUE', 'FUNA', 'LIMETE', '2025-09-17', '2025-09-17', 'Administrateur(trice)', '2025-2026', 400.00, 'informatique@cselmasombe.org', 'actif', 1, '$2y$10$JqXCbwplCH8kwoe5C8yj9uM5TB7gxR2GqMLDQpaonWLQcDupIauhu'),
@@ -11170,7 +11173,7 @@ CREATE TABLE `option` (
   `dateCreated` date NOT NULL,
   `dateUpdate` date NOT NULL,
   `annee_scolaire` varchar(10) COLLATE utf8mb3_bin NOT NULL
-) ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 
 --
 -- Déchargement des données de la table `option`
@@ -11194,7 +11197,7 @@ CREATE TABLE `paiement` (
   `observation` text COLLATE utf8mb3_bin NOT NULL,
   `dateCreated` date NOT NULL,
   `anneeScolaire` varchar(10) COLLATE utf8mb3_bin NOT NULL
-)  ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin ROW_FORMAT=DYNAMIC;
 
 --
 -- Déchargement des données de la table `paiement`
@@ -13266,7 +13269,9 @@ INSERT INTO `paiement` (`id`, `menage`, `montantAPayer`, `montantPayer`, `resteA
 (2079, 252, 35.00, 35.00, 0.00, 'Paiement effectué.', '2026-06-18', '2025-2026'),
 (2080, 324, 10.00, 10.00, 0.00, 'Paiement effectué.', '2026-06-18', '2025-2026'),
 (2081, 404, 3.00, 3.00, 0.00, 'Paiement effectué.', '2026-06-18', '2025-2026'),
-(2082, 222, 20.00, 20.00, 0.00, 'Paiement effectué.', '2026-06-20', '2025-2026');
+(2082, 222, 20.00, 20.00, 0.00, 'Paiement effectué.', '2026-06-20', '2025-2026'),
+(2083, 238, 50.00, 10.00, 40.00, 'Paiement effectué.', '2026-07-01', '2025-2026'),
+(2084, 388, 202.00, 80.00, 122.00, 'Paiement effectué.', '2026-07-01', '2025-2026');
 
 -- --------------------------------------------------------
 
@@ -13282,7 +13287,7 @@ CREATE TABLE `paiement_detail` (
   `tranche_id` int DEFAULT NULL,
   `montant` decimal(10,2) NOT NULL,
   `date_created` date NOT NULL
-) ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 
 --
 -- Déchargement des données de la table `paiement_detail`
@@ -16799,7 +16804,7 @@ CREATE TABLE `presence_agent` (
   `motif` text COLLATE utf8mb3_bin,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `created_by` int DEFAULT NULL
-) ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 
 -- --------------------------------------------------------
 
@@ -30144,7 +30149,8 @@ INSERT INTO `quiz_answer` (`id`, `submission_id`, `question_id`, `reponse_text`,
 (13575, 3371, 36090, NULL, 87920, 0.00, NULL, NULL),
 (13576, 3372, 36146, NULL, 88036, 0.00, NULL, NULL),
 (13577, 3373, 36047, NULL, 87834, 0.00, NULL, NULL),
-(13578, 3374, 36009, NULL, 87759, 1.00, NULL, NULL);
+(13578, 3374, 36009, NULL, 87759, 1.00, NULL, NULL),
+(13579, 3375, 36146, NULL, 88036, 0.00, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -31828,7 +31834,7 @@ CREATE TABLE `quiz_question` (
   `question_text` text NOT NULL,
   `points` decimal(6,2) NOT NULL DEFAULT '1.00',
   `sort_order` int NOT NULL DEFAULT '1',
-  `expected_answer` varchar(255)  DEFAULT NULL,
+  `expected_answer` varchar(255) DEFAULT NULL,
   `similarity_min` decimal(5,2) DEFAULT '50.00' COMMENT 'Seuil minimal de similarité'
 ) ;
 
@@ -35931,7 +35937,8 @@ INSERT INTO `quiz_submission` (`id`, `quiz_id`, `periode_id`, `eleve_id`, `date_
 (3371, 176, 12, 637, '2026-06-25 20:48:14', 0.00, 'corrige'),
 (3372, 181, 12, 488, '2026-06-29 18:23:38', 0.00, 'corrige'),
 (3373, 171, 12, 488, '2026-06-29 18:25:29', 0.00, 'corrige'),
-(3374, 164, 4, 595, '2026-07-01 14:12:07', 1.00, 'corrige');
+(3374, 164, 4, 595, '2026-07-01 14:12:07', 1.00, 'corrige'),
+(3375, 181, 12, 769, '2026-07-19 21:59:49', 0.00, 'corrige');
 
 -- --------------------------------------------------------
 
@@ -35995,7 +36002,9 @@ INSERT INTO `responsables` (`id`, `code_famille`, `nom_complet`, `telephone1`, `
 (13, 'FAM20260002', 'Kisanga ', '85312543', '826612326', 'kisangab95@gmail.com', 'Religions ', 'Avenue garagiste ', '2026-07-06 21:08:30'),
 (18, 'FAM20260003', 'MBENZA MBENZA Charly ', '0980287578', '0980287578', 'cm.chrismbenza@gmail.com', 'ingénieur ', 'Kasanzi 80, Q/qngafani, C/Selembao', '2026-07-09 13:25:13'),
 (19, 'FAM20260004', 'MPUTU OKENGE HÉRITIER ', '+243 980620322', '+243 810331128', 'okengeh04@gmail.com', 'Enseignant ', 'Sis Kasombo 12 bis Q/Kingabwa \r\nCommune: Limete ', '2026-07-09 15:45:13'),
-(20, 'FAM20260005', 'MPUTU OKENGE HÉRITIER ', '+243 980620322', '+243 810331128', 'okengeh04@gmail.com', 'Enseignant ', 'Sis Kasombo 12 bis Q/Kingabwa \r\nCommune: Limete ', '2026-07-09 15:47:17');
+(20, 'FAM20260005', 'MPUTU OKENGE HÉRITIER ', '+243 980620322', '+243 810331128', 'okengeh04@gmail.com', 'Enseignant ', 'Sis Kasombo 12 bis Q/Kingabwa \r\nCommune: Limete ', '2026-07-09 15:47:17'),
+(21, 'FAM20260006', 'Divine Odia', '0815962800', '089', 'divinemuambaodia@gmail.com', 'Caissière ', 'NGABA', '2026-07-20 11:04:00'),
+(22, 'FAM20260007', 'SALUMU ELONGA GRACE', '0821228431', '0814326299', 'salumusaelg@gmail.com', 'Fonctionnaire de l\' Etat', 'Av tp bis, n°157, Quartier Socopao Commune de Limete', '2026-07-23 21:54:00');
 
 -- --------------------------------------------------------
 
@@ -36012,7 +36021,7 @@ CREATE TABLE `scolarite` (
   `dateUpdate` date NOT NULL,
   `createdby` text COLLATE utf8mb3_bin NOT NULL,
   `anneeScolaire` varchar(10) COLLATE utf8mb3_bin NOT NULL
-) ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 
 --
 -- Déchargement des données de la table `scolarite`
@@ -36037,7 +36046,7 @@ INSERT INTO `scolarite` (`id`, `description`, `cycle`, `montant`, `dateCreated`,
 CREATE TABLE `systeme` (
   `id` int NOT NULL,
   `devise` varchar(1) COLLATE utf8mb3_bin NOT NULL
-) ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 
 --
 -- Déchargement des données de la table `systeme`
@@ -36057,7 +36066,7 @@ CREATE TABLE `tranche` (
   `frais_id` int DEFAULT NULL,
   `numero_tranche` int DEFAULT NULL,
   `montant` decimal(10,2) DEFAULT NULL
-) ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 
 --
 -- Déchargement des données de la table `tranche`
@@ -36124,7 +36133,7 @@ CREATE TABLE `virement` (
   `date_virement` datetime NOT NULL,
   `anneeScolaire` varchar(10) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin NOT NULL,
   `observation` text CHARACTER SET utf8mb3 COLLATE utf8mb3_bin
-) ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 
 --
 -- Déchargement des données de la table `virement`
@@ -36597,7 +36606,7 @@ ALTER TABLE `eleve`
 -- AUTO_INCREMENT pour la table `inscriptions`
 --
 ALTER TABLE `inscriptions`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- AUTO_INCREMENT pour la table `menage`
@@ -36621,7 +36630,7 @@ ALTER TABLE `option`
 -- AUTO_INCREMENT pour la table `paiement`
 --
 ALTER TABLE `paiement`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2083;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2085;
 
 --
 -- AUTO_INCREMENT pour la table `paiement_detail`
@@ -36675,7 +36684,7 @@ ALTER TABLE `quiz_ai_log`
 -- AUTO_INCREMENT pour la table `quiz_answer`
 --
 ALTER TABLE `quiz_answer`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13579;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13580;
 
 --
 -- AUTO_INCREMENT pour la table `quiz_attachment`
@@ -36711,7 +36720,7 @@ ALTER TABLE `quiz_question_keyword`
 -- AUTO_INCREMENT pour la table `quiz_submission`
 --
 ALTER TABLE `quiz_submission`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3375;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3376;
 
 --
 -- AUTO_INCREMENT pour la table `quiz_submission_attachment`
@@ -36729,7 +36738,7 @@ ALTER TABLE `recu_annule`
 -- AUTO_INCREMENT pour la table `responsables`
 --
 ALTER TABLE `responsables`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
 
 --
 -- AUTO_INCREMENT pour la table `scolarite`

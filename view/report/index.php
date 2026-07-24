@@ -1,5 +1,8 @@
 <?php
 require_once('../../webapp/database/config.php');
+require_once ('../../layouts/constants/head.php'); 
+require_once ('../../webapp/service/annee_scolaire.service.php'); 
+require_once ('../../layouts/navbar/navbar.php');
 
 function h($v){ return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8'); }
 function money($n){ return number_format((float)$n, 2, '.', ' ') . ' $'; }
@@ -540,6 +543,7 @@ require_once('../../layouts/navbar/navbar.php');
                         </a>
                         <button type="button" class="btn btn-danger" onclick="window.print()">Imprimer
                         </button>
+                        <a href="report_annuel.php" class="btn btn-dark">Report annuel</a>
                     </div>
                 </form>
             </div>
