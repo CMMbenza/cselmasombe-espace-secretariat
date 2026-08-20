@@ -147,7 +147,7 @@ require_once('../../layouts/navbar/navbar.php');
 
                             <div class="col-12 col-md-6 col-lg-3">
                                 <a class="btn btn-outline-warning w-100"
-                                    href="../ventilation_de_caisse/ventiallation_caisse_frais_scolaire.php">
+                                    href="../ventilation_de_caisse/">
                                     <span class="menu-icon chart"><i class="mdi mdi-chart-pie"></i></span>
                                     Ventilation FS/FC
                                 </a>
@@ -159,7 +159,7 @@ require_once('../../layouts/navbar/navbar.php');
                         <div class="row quick-actions g-3 mt-2">
 
                             <div class="col-12 col-md-6 col-lg-3">
-                                <a class="btn btn-outline-warning w-100" href="../statisque_inventaire">
+                                <a class="btn btn-outline-warning w-100" href="../statisque_inventaire/">
                                     <span class="menu-icon chart"><i class="mdi mdi-chart-donut"></i></span>
                                     Statisque inventaire
                                 </a>

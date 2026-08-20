@@ -7,33 +7,14 @@ require_once ('../../layouts/navbar/navbar.php');
 <div class="main-panel-copy">
     <div class="content-wrapper">
         <div class="row">
-            <!-- <div class="col-12 grid-margin">
-                            <div class="card">
-                                <div class="card-body">
-                                    <h3 class="card-title"><span class="menu-icon">
-                                            <i class="mdi mdi-speedometer"></i>
-                                        </span>Elève</h3>
-                                    <h6 class="wrapper-filtrage">Filtrage des données :</h6>
-                                    <div class="d-flex align-items-center justify-content-between">
-                                        <div class="wrapper-entity">
-                                            <a href="create-update.php" class="btn btn-success btn-block enter-btn">Nouveau élève</a>
-                                        </div>
-                                        <input type="text" class="form-control p_input" placeholder="Entrez nom élève">
-
-                                    </div>
-
-                                </div>
-                            </div>
-                        </div> -->
 
             <div class="col-lg-7 col-sm-12 grid-margin">
                 <form action="<?php echo $_SERVER['PHP_SELF']; ?>" method="post" role="form">
 
                     <div class="card">
                         <div class="card-body">
-                            <h4 class="card-title mb-4"><button class="btn btn-primary btn-block enter-btn me-2" name=""
-                                    id=""><span class="menu-icon">
-                                        <i class="mdi mdi-speedometer"></i>
+                            <h4 class="card-title mb-4">
+                                <a href="../classe/" class="btn btn-dark">Retour</a>
                                     </span></button>Gestion des classes</h4>
 
                             <div class="row">

@@ -43,9 +43,9 @@ if ($action === 'save_scolaire') {
 
     // 1. Détermination automatique du statut d'observation
     if ($nouveauReste <= 0) {
-        $observation = "paiement soldé";
+        $observation = "Paiement soldé";
     } else {
-        $observation = "paiement encours";
+        $observation = "Paiement encours";
     }
     
     // Si l'utilisateur a saisi une note supplémentaire, on la concatène
@@ -112,12 +112,12 @@ if ($action === 'save_divers') {
 
     // Détermination automatique du statut d'observation pour les frais divers
     if ($nouveauReste <= 0) {
-        $observation = "paiement soldé";
+        $observation = "Paiement soldé";
     } else {
-        $observation = "paiement encours";
+        $observation = "Paiement encours";
     }
     if (!empty($userObs)) {
-        $observation .= " - " . $userObs;
+        $observations = $observation . " - " . $userObs;
     }
 
     $sql = "INSERT INTO paiement_divers (menage, type_frais, montantAPayer, montantPayer, resteAPayer, observation, anneeScolaire, dateCreated) 
@@ -129,7 +129,7 @@ if ($action === 'save_divers') {
         exit;
     }
 
-    $stmt->bind_param("isdddsss", $menageId, $typeFrais, $soldeDu, $montantPayer, $nouveauReste, $observation, $anneeScolaire, $dateCreated);
+    $stmt->bind_param("isdddsss", $menageId, $typeFrais, $soldeDu, $montantPayer, $nouveauReste, $observations, $anneeScolaire, $dateCreated);
 
     if ($stmt->execute()) {
         $lastId = $stmt->insert_id;

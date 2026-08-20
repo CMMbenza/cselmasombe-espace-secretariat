@@ -121,3 +121,18 @@ ALTER TABLE
     `eleve` ADD `montantAPayerFC` DECIMAL(10, 2) NOT NULL AFTER `montant_a_payer`;
 ALTER TABLE
     `paiement` CHANGE `dateCreated` `dateCreated` TIMESTAMP NOT NULL;
+
+    <!-- MAJ 18.08.2026 -->
+    -- Ajout du champ nationalité dans la table inscriptions
+ALTER TABLE `inscriptions` 
+ADD COLUMN `nationalite` varchar(100) DEFAULT NULL AFTER `genre`;
+
+-- Ajout des champs nom du père, de la mère et province dans la table responsables
+ALTER TABLE `responsables` 
+ADD COLUMN `nom_pere` varchar(255) DEFAULT NULL AFTER `nom_complet`,
+ADD COLUMN `nom_mere` varchar(255) DEFAULT NULL AFTER `nom_pere`,
+ADD COLUMN `province` varchar(100) DEFAULT NULL AFTER `adresse`;
+ALTER TABLE `menage` ADD `nom_du_pere` VARCHAR(20) NOT NULL AFTER `noms`, ADD `nom_de_la_mere` VARCHAR(20) NOT NULL AFTER `nom_du_pere`;
+ALTER TABLE `menage` ADD `profesion` VARCHAR(20) NOT NULL AFTER `nom_de_la_mere`;
+ALTER TABLE `menage` CHANGE `avenue` `avenue` VARCHAR(100) NOT NULL;
+ALTER TABLE `classe` CHANGE `anneeScolaire` `anneeScolaire` VARCHAR(20) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL;

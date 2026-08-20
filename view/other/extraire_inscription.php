@@ -3,7 +3,9 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-require_once('../../webapp/database/config.php');
+require_once('../../webapp/database/config.php'); // $con (mysqli)
+require_once('../../webapp/service/annee_scolaire.encours.php'); // $annee_scolaire
+
 mysqli_set_charset($con, 'utf8mb4');
 session_start();
 
@@ -21,15 +23,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     mysqli_begin_transaction($con);
 
     try {
-        // A. Récupération des données de l'inscription et du responsable lié
+        // A. Récupération des données d'inscription et du responsable
         $sql_select = "
             SELECT 
                 i.*, 
                 r.nom_complet AS resp_nom, 
+                r.nom_pere AS resp_nom_pere,
+                r.nom_mere AS resp_nom_mere,
+                r.profession AS resp_profession,
                 r.telephone1 AS resp_tel1, 
                 r.telephone2 AS resp_tel2, 
                 r.email AS resp_email, 
-                r.adresse AS resp_adresse
+                r.adresse AS resp_adresse,
+                r.province AS resp_province
             FROM inscriptions i
             INNER JOIN responsables r ON i.responsable_id = r.id
             WHERE i.id = ? AND i.statut = 'EN_ATTENTE'
@@ -49,7 +55,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
         $row = mysqli_fetch_assoc($res);
 
-        // B. Insertion ou Récupération du Ménage (Responsable)
+        // B. Recherche du Ménage existant ou Création
         $menage_id = null;
         $sql_check_menage = "SELECT id FROM menage WHERE telephone = ? OR (email = ? AND email != '') LIMIT 1";
         $stmt_check = mysqli_prepare($con, $sql_check_menage);
@@ -57,22 +63,62 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         mysqli_stmt_execute($stmt_check);
         $res_check = mysqli_stmt_get_result($stmt_check);
 
+        // Tronquer l'adresse pour respecter la taille en BDD si VARCHAR(20)
+        $avenue_securisee = mb_substr($row['resp_adresse'] ?? '', 0, 20);
+
         if ($m = mysqli_fetch_assoc($res_check)) {
-            $menage_id = $m['id'];
+            $menage_id = (int)$m['id'];
+
+            // Mise à jour si données manquantes
+            $sql_upd_m = "
+                UPDATE menage SET 
+                    nom_du_pere = IF(nom_du_pere = '' OR nom_du_pere IS NULL, ?, nom_du_pere),
+                    nom_de_la_mere = IF(nom_de_la_mere = '' OR nom_de_la_mere IS NULL, ?, nom_de_la_mere),
+                    profesion = IF(profesion = '' OR profesion IS NULL, ?, profesion),
+                    province = IF(province = '' OR province IS NULL, ?, province),
+                    dateUpdate = CURRENT_TIMESTAMP
+                WHERE id = ?
+            ";
+            $stmt_upd_m = mysqli_prepare($con, $sql_upd_m);
+            mysqli_stmt_bind_param($stmt_upd_m, "ssssi", 
+                $row['resp_nom_pere'], 
+                $row['resp_nom_mere'], 
+                $row['resp_profession'],
+                $row['resp_province'], 
+                $menage_id
+            );
+            mysqli_stmt_execute($stmt_upd_m);
+
         } else {
             // Création d'un nouveau ménage
             $sql_ins_menage = "
-                INSERT INTO menage (noms, telephone, avenue, email, dateCreated, STATUS) 
-                VALUES (?, ?, ?, ?, NOW(), 'actif')
+                INSERT INTO menage (
+                    noms, nom_du_pere, nom_de_la_mere, profesion, telephone, numero, avenue, 
+                    quartier, commune, province, email, dateCreated, dateUpdate, 
+                    createdby, anneeScolaire, montantAPayer, montantAPayerFC, STATUS, start_tranche, password
+                ) VALUES (?, ?, ?, ?, ?, '', ?, '', '', ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'Administrateur(trice)', ?, 0.00, 0.00, 'actif', 1, '')
             ";
+            
             $stmt_ins_m = mysqli_prepare($con, $sql_ins_menage);
             if (!$stmt_ins_m) { throw new Exception("Erreur création ménage : " . mysqli_error($con)); }
             
-            mysqli_stmt_bind_param($stmt_ins_m, "ssss", 
+            $nom_p = $row['resp_nom_pere'] ?? '';
+            $nom_m = $row['resp_nom_mere'] ?? '';
+            $prof  = $row['resp_profession'] ?? '';
+            $prov  = $row['resp_province'] ?? '';
+            $email = $row['resp_email'] ?? '';
+            $annee = !empty($row['annee_scolaire']) ? $row['annee_scolaire'] : ($annee_scolaire ?? date('Y'));
+
+            mysqli_stmt_bind_param($stmt_ins_m, "sssssssss", 
                 $row['resp_nom'], 
+                $nom_p,
+                $nom_m,
+                $prof,
                 $row['resp_tel1'], 
-                $row['resp_adresse'], 
-                $row['resp_email']
+                $avenue_securisee, 
+                $prov,
+                $email,
+                $annee
             );
             
             if (!mysqli_stmt_execute($stmt_ins_m)) {
@@ -81,34 +127,42 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             $menage_id = mysqli_insert_id($con);
         }
 
-        // C. Insertion dans la table des Élèves actifs
+        // C. Insertion de l'élève
+        $matricule_temp = 'MAT' . date('Ym') . str_pad((string)$inscription_id, 4, '0', STR_PAD_LEFT);
+        $nationalite = !empty($row['nationalite']) ? strtoupper($row['nationalite']) : 'CONGOLAISE';
+        $classe_id = (int)($row['classe'] ?? 0);
+        $annee = !empty($row['annee_scolaire']) ? $row['annee_scolaire'] : ($annee_scolaire ?? date('Y'));
+
         $sql_ins_eleve = "
             INSERT INTO eleve (
-                nom, postnom, prenom, genre, lieu, dateDeNaissance, 
-                classe, menage, anneeScolaire, dateCreated, STATUS
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), 'actif')
+                matricule, nom, postnom, prenom, genre, lieu, dateDeNaissance, 
+                classe, menage, nationalite, dateCreated, dateUpdate, anneeScolaire, 
+                createdby, montant_a_payer, montantAPayerFC, STATUS
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, 'Administrateur(trice)', 0.00, 0.00, 'actif')
         ";
         
         $stmt_eleve = mysqli_prepare($con, $sql_ins_eleve);
         if (!$stmt_eleve) { throw new Exception("Erreur préparation élève : " . mysqli_error($con)); }
 
-        mysqli_stmt_bind_param($stmt_eleve, "sssssssis", 
+        mysqli_stmt_bind_param($stmt_eleve, "sssssssiiss", 
+            $matricule_temp,
             $row['nom'], 
             $row['postnom'], 
             $row['prenom'], 
             $row['genre'], 
             $row['lieu_naissance'], 
             $row['date_naissance'], 
-            $row['classe'], 
+            $classe_id, 
             $menage_id, 
-            $row['annee_scolaire']
+            $nationalite,
+            $annee
         );
 
         if (!mysqli_stmt_execute($stmt_eleve)) {
             throw new Exception("Erreur création fiche élève : " . mysqli_stmt_error($stmt_eleve));
         }
 
-        // D. Mise à jour du statut dans inscriptions (Conservation des données)
+        // D. Mise à jour du statut
         $sql_upd = "UPDATE inscriptions SET statut = 'VALIDE' WHERE id = ?";
         $stmt_upd = mysqli_prepare($con, $sql_upd);
         mysqli_stmt_bind_param($stmt_upd, "i", $inscription_id);
@@ -118,15 +172,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         
         $_SESSION['success'] = "L'élève " . htmlspecialchars($row['nom'] . " " . $row['prenom']) . " a été extrait avec succès !";
         
-        // Redirection directe vers la fiche du ménage
         header("Location: ../menage/create-update.php?id=" . $menage_id);
-        exit;
+        exit();
 
     } catch (Exception $e) {
         mysqli_rollback($con);
         $_SESSION['error'] = "Échec de l'extraction : " . $e->getMessage();
         header("Location: extraire_inscription.php");
-        exit;
+        exit();
     }
 }
 
@@ -137,14 +190,20 @@ $sql_attente = "
     SELECT 
         i.*, 
         r.nom_complet AS resp_nom, 
+        r.nom_pere AS resp_nom_pere,
+        r.nom_mere AS resp_nom_mere,
+        r.profession AS resp_profession,
         r.telephone1 AS resp_tel1, 
-        r.email AS resp_email
+        r.email AS resp_email,
+        r.province AS resp_province
     FROM inscriptions i
     INNER JOIN responsables r ON i.responsable_id = r.id
     WHERE i.statut = 'EN_ATTENTE'
     ORDER BY i.created_at DESC
 ";
+
 $resultats = mysqli_query($con, $sql_attente);
+$nb_attente = ($resultats instanceof mysqli_result) ? mysqli_num_rows($resultats) : 0;
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -162,9 +221,8 @@ $resultats = mysqli_query($con, $sql_attente);
         <div class="row mb-4">
             <div class="col-md-12">
                 <div class="d-flex justify-content-between align-items-center bg-white p-3 rounded shadow-sm">
-                    <h3 class="mb-0 text-primary"><i class="fas fa-user-plus me-2"></i> Extraire & Valider les
-                        Inscriptions</h3>
-                    <span class="badge bg-warning text-dark fs-6"><?= mysqli_num_rows($resultats) ?> en attente</span>
+                    <h3 class="mb-0 text-primary"><i class="fas fa-user-plus me-2"></i> Extraire & Valider les Inscriptions</h3>
+                    <span class="badge bg-warning text-dark fs-6"><?= $nb_attente ?> en attente</span>
                 </div>
             </div>
         </div>
@@ -195,44 +253,45 @@ $resultats = mysqli_query($con, $sql_attente);
                             <tr>
                                 <th>Code Famille</th>
                                 <th>Élève</th>
-                                <th>Genre / Naissance</th>
+                                <th>Genre / Nat. / Naissance</th>
                                 <th>Classe demandée</th>
-                                <th>Responsable / Tuteur</th>
-                                <th>Provenance</th>
+                                <th>Responsable (Père / Mère)</th>
+                                <th>Province</th>
                                 <th class="text-center">Action</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <?php if (mysqli_num_rows($resultats) > 0): ?>
+                            <?php if ($nb_attente > 0): ?>
                             <?php while ($row = mysqli_fetch_assoc($resultats)): ?>
                             <tr>
-                                <td><span
-                                        class="badge bg-secondary"><?= htmlspecialchars($row['code_famille']) ?></span>
+                                <td>
+                                    <span class="badge bg-secondary"><?= htmlspecialchars($row['code_famille'] ?? '') ?></span>
                                 </td>
                                 <td>
-                                    <strong><?= htmlspecialchars($row['nom'] . ' ' . $row['postnom']) ?></strong><br>
-                                    <small class="text-muted"><?= htmlspecialchars($row['prenom']) ?></small>
+                                    <strong><?= htmlspecialchars(($row['nom'] ?? '') . ' ' . ($row['postnom'] ?? '')) ?></strong><br>
+                                    <small class="text-muted"><?= htmlspecialchars($row['prenom'] ?? '') ?></small>
                                 </td>
                                 <td>
-                                    <span class="badge bg-info text-dark"><?= $row['genre'] ?></span><br>
-                                    <small
-                                        class="text-muted"><?= $row['date_naissance'] ? date('d/m/Y', strtotime($row['date_naissance'])) : '-' ?></small>
+                                    <span class="badge bg-info text-dark"><?= htmlspecialchars($row['genre'] ?? '') ?></span>
+                                    <small class="badge bg-light text-dark border"><?= htmlspecialchars($row['nationalite'] ?? 'CONGOLAISE') ?></small><br>
+                                    <small class="text-muted"><?= !empty($row['date_naissance']) ? date('d/m/Y', strtotime($row['date_naissance'])) : '-' ?></small>
                                 </td>
                                 <td>
-                                    <strong class="text-dark"><?= htmlspecialchars($row['classe']) ?></strong><br>
-                                    <small
-                                        class="text-muted"><?= htmlspecialchars($row['option_etude'] ?? '') ?></small>
+                                    <strong class="text-dark"><?= htmlspecialchars($row['classe'] ?? '') ?></strong><br>
+                                    <small class="text-muted"><?= htmlspecialchars($row['option_etude'] ?? '') ?></small>
                                 </td>
                                 <td>
-                                    <i
-                                        class="fas fa-user-tie text-muted me-1"></i><?= htmlspecialchars($row['resp_nom']) ?><br>
-                                    <small class="text-muted"><i
-                                            class="fas fa-phone me-1"></i><?= htmlspecialchars($row['resp_tel1']) ?></small>
+                                    <i class="fas fa-user-tie text-muted me-1"></i><strong><?= htmlspecialchars($row['resp_nom'] ?? '') ?></strong><br>
+                                    <small class="text-muted">P: <?= htmlspecialchars($row['resp_nom_pere'] ?? 'N/A') ?> | M: <?= htmlspecialchars($row['resp_nom_mere'] ?? 'N/A') ?></small><br>
+                                    <small class="text-muted"><i class="fas fa-phone me-1"></i><?= htmlspecialchars($row['resp_tel1'] ?? '') ?></small>
                                 </td>
-                                <td><small><?= htmlspecialchars($row['ecole_provenance'] ?? 'N/A') ?></small></td>
+                                <td>
+                                    <span class="badge bg-outline-primary text-primary border border-primary">
+                                        <?= htmlspecialchars($row['resp_province'] ?? 'N/A') ?>
+                                    </span>
+                                </td>
                                 <td class="text-center">
-                                    <form method="POST"
-                                        onsubmit="return confirm('Voulez-vous valider cette inscription et ouvrir la fiche du ménage ?');">
+                                    <form method="POST" onsubmit="return confirm('Voulez-vous valider cette inscription et ouvrir la fiche du ménage ?');">
                                         <input type="hidden" name="action" value="valider_inscription">
                                         <input type="hidden" name="inscription_id" value="<?= $row['id'] ?>">
                                         <button type="submit" class="btn btn-success btn-sm px-3 fw-bold">

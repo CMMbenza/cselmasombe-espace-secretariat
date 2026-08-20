@@ -67,6 +67,7 @@ $dateCreated    = $row['dateCreated'];
 
 /* ====== Date formatée ====== */
 $formattedDate = date("d/m/Y", strtotime($dateCreated));
+$derniereChiffreDeLAnnee = date('y');
 ?>
 
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
@@ -206,7 +207,7 @@ p {
                                                 <tbody>
                                                     <tr>
                                                         <td align="left">
-                                                            <img src="../../assets/images/IMG-20250624-WA0013.jpg"
+                                                            <img src="../../../assets/images/IMG-20250624-WA0013.jpg"
                                                                 width="80" height="80" alt="logo" border="0"
                                                                 class="img-fluid" />
                                                         </td>
@@ -240,7 +241,8 @@ p {
                                                     <tr>
                                                         <td
                                                             style="font-size:20px;color:#ff0000;letter-spacing:-1px;font-family:'Open Sans',sans-serif;line-height:1;vertical-align:top;text-align:right;">
-                                                            Reçu FC/N° <?php echo e($codeRecu); ?>/25
+                                                            N° Reçu :
+                                                            <?php echo e($codeRecu); ?>/<?php echo $derniereChiffreDeLAnnee;?>
                                                         </td>
                                                     </tr>
                                                     <tr class="hiddenMobile">
@@ -312,13 +314,13 @@ p {
                                             </tr>
 
                                             <tr>
-                                                <!-- <td style="font-size:20px;font-family:'Open Sans',sans-serif;color:#ff0000;line-height:18px;vertical-align:top;padding:10px 0;"
+                                                <td style="font-size:20px;font-family:'Open Sans',sans-serif;color:#ff0000;line-height:18px;vertical-align:top;padding:10px 0;"
                                                     class="article">
                                                     <?php echo e($codeMenage); ?> - <?php echo e($menage); ?>
                                                     <div style="font-size:13px;color:#646a6e;margin-top:4px;">
-                                                        Type de frais : <strong><?php echo e($typeFrais); ?></strong>
+                                                        Type de frais : <strong>Frais connexe</strong>
                                                     </div>
-                                                </td> -->
+                                                </td>
                                                 <td
                                                     style="font-size:20px;font-family:'Open Sans',sans-serif;color:#646a6e;line-height:18px;vertical-align:top;padding:10px 0;">
                                                     <small><?php echo money($montantPayer); ?> $</small>
@@ -408,7 +410,7 @@ p {
                                     <tr>
                                         <td
                                             style="font-size:16px;color:#5b5b5b;font-family:'Open Sans',sans-serif;line-height:16px;vertical-align:top;text-align:left;">
-                                            Valable pour l'année scolaire <br><?php echo e($anneeScolaire); ?>.
+                                            Valable pour l'année scolaire : <?php echo e($anneeScolaire); ?>
                                         </td>
                                     </tr>
                                     <tr>

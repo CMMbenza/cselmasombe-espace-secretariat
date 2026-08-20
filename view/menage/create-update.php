@@ -14,7 +14,6 @@ if (!function_exists('e')) {
 $isEdit = false;
 $menage = null;
 
-// Vérification de la présence et de la validité du paramètre ?id=val
 if (isset($_GET['id']) && ctype_digit($_GET['id'])) {
   $id = (int)$_GET['id'];
   $stmt = $con->prepare("SELECT * FROM menage WHERE id = ?");
@@ -22,7 +21,6 @@ if (isset($_GET['id']) && ctype_digit($_GET['id'])) {
   $stmt->execute();
   $result = $stmt->get_result();
   
-  // Si le ménage existe bien en BDD, on passe en mode édition
   if ($row = $result->fetch_assoc()) {
     $isEdit = true;
     $menage = $row;
@@ -34,7 +32,7 @@ if (isset($_GET['id']) && ctype_digit($_GET['id'])) {
 <div class="main-panel-copy">
     <div class="content-wrapper">
         <div class="row">
-            <div class="col-lg-7 col-sm-12 grid-margin">
+            <div class="col-lg-8 col-sm-12 grid-margin">
                 <form action="<?php echo e($_SERVER['PHP_SELF']) . ($isEdit ? '?id='.(int)$menage['id'] : ''); ?>"
                     method="post" role="form">
 
@@ -43,28 +41,26 @@ if (isset($_GET['id']) && ctype_digit($_GET['id'])) {
                     <div class="card">
                         <div class="card-body">
                             <div class="d-flex justify-content-between align-items-center flex-wrap mb-4">
-
                                 <h4 class="card-title d-flex align-items-center mb-2 mb-md-0">
                                     <button class="btn btn-primary me-2" type="button">
                                         <i class="mdi mdi-speedometer"></i>
                                     </button>
-
                                     <?php echo $isEdit ? "Modifier la famille #".(int)$menage['id'] : "Gestion des familles"; ?>
                                 </h4>
 
                                 <a href="../other/extraire_inscription.php" class="btn btn-outline-success">
-                                    <i class="mdi mdi-file-export me-1"></i>
-                                    Extraire l'inscription
+                                    <i class="mdi mdi-file-export me-1"></i> Extraire l'inscription
                                 </a>
-
                             </div>
+
+                            <!-- Noms du Ménage / Famille -->
                             <div class="row">
                                 <div class="col-lg-12 col-sm-12">
                                     <div class="form-group">
-                                        <label class="form-label">Noms</label>
+                                        <label class="form-label">Noms de la famille</label>
                                         <input type="text" class="form-control" name="noms" id="noms"
                                             value="<?php echo $isEdit ? e($menage['noms']) : ''; ?>"
-                                            placeholder="Nom famille" oninput="this.value=this.value.toUpperCase();"
+                                            placeholder="Nom de famille" oninput="this.value=this.value.toUpperCase();"
                                             required>
                                         <small class="text-danger">Si vous enregistrez une famille de personnes,
                                             assurez-vous de toujours inclure le nom
@@ -73,6 +69,38 @@ if (isset($_GET['id']) && ctype_digit($_GET['id'])) {
                                 </div>
                             </div>
 
+                            <!-- Nom du Père, Nom de la Mère & Profession -->
+                            <div class="row">
+                                <div class="col-lg-4 col-sm-12">
+                                    <div class="form-group">
+                                        <label class="form-label">Nom du Père</label>
+                                        <input type="text" class="form-control" name="nom_du_pere" id="nom_du_pere"
+                                            value="<?php echo $isEdit ? e($menage['nom_du_pere']) : ''; ?>"
+                                            placeholder="Nom complet du père"
+                                            oninput="this.value=this.value.toUpperCase();">
+                                    </div>
+                                </div>
+                                <div class="col-lg-4 col-sm-12">
+                                    <div class="form-group">
+                                        <label class="form-label">Nom de la Mère</label>
+                                        <input type="text" class="form-control" name="nom_de_la_mere"
+                                            id="nom_de_la_mere"
+                                            value="<?php echo $isEdit ? e($menage['nom_de_la_mere']) : ''; ?>"
+                                            placeholder="Nom complet de la mère"
+                                            oninput="this.value=this.value.toUpperCase();">
+                                    </div>
+                                </div>
+                                <div class="col-lg-4 col-sm-12">
+                                    <div class="form-group">
+                                        <label class="form-label">Profession</label>
+                                        <input type="text" class="form-control" name="profesion" id="profesion"
+                                            value="<?php echo $isEdit ? e($menage['profesion'] ?? '') : ''; ?>"
+                                            placeholder="Profession du responsable">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Téléphone & Email -->
                             <div class="row">
                                 <div class="col-lg-6 col-sm-12">
                                     <div class="form-group">
@@ -92,6 +120,7 @@ if (isset($_GET['id']) && ctype_digit($_GET['id'])) {
                                 </div>
                             </div>
 
+                            <!-- Avenue & Numéro -->
                             <div class="row">
                                 <div class="col-lg-6 col-sm-12">
                                     <div class="form-group">
@@ -111,8 +140,9 @@ if (isset($_GET['id']) && ctype_digit($_GET['id'])) {
                                 </div>
                             </div>
 
+                            <!-- Quartier, Commune & Province -->
                             <div class="row">
-                                <div class="col-lg-6 col-sm-12">
+                                <div class="col-lg-4 col-sm-12">
                                     <div class="form-group">
                                         <label class="form-label">Quartier</label>
                                         <input type="text" class="form-control" name="quartier" id="quartier"
@@ -120,12 +150,20 @@ if (isset($_GET['id']) && ctype_digit($_GET['id'])) {
                                             placeholder="Quartier" required>
                                     </div>
                                 </div>
-                                <div class="col-lg-6 col-sm-12">
+                                <div class="col-lg-4 col-sm-12">
                                     <div class="form-group">
                                         <label class="form-label">Commune</label>
                                         <input type="text" class="form-control" name="commune" id="commune"
                                             value="<?php echo $isEdit ? e($menage['commune']) : ''; ?>"
                                             placeholder="Commune" required>
+                                    </div>
+                                </div>
+                                <div class="col-lg-4 col-sm-12">
+                                    <div class="form-group">
+                                        <label class="form-label">Province</label>
+                                        <input type="text" class="form-control" name="province" id="province"
+                                            value="<?php echo $isEdit ? e($menage['province']) : ''; ?>"
+                                            placeholder="Province" required>
                                     </div>
                                 </div>
                             </div>

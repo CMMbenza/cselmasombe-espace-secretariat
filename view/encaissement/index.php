@@ -39,19 +39,28 @@ $sqlTotalDivers = "SELECT COALESCE(SUM(montantPayer), 0) AS total FROM paiement_
 $resDivers = $conn->query($sqlTotalDivers);
 $totalDivers = $resDivers ? $resDivers->fetch_assoc()['total'] : 0;
 
-// Historique combiné du jour
+// Historique combiné
 $sqlJour = "
-    (SELECT 'Scolaire' AS nature, p.id, m.noms AS menage, 'Scolarité' AS motif, p.montantPayer, p.resteAPayer, p.dateCreated 
-     FROM paiement p JOIN menage m ON m.id = p.menage WHERE DATE(p.dateCreated) = CURDATE() AND m.status ='actif')
+    (SELECT 'Scolaire' AS nature, p.id, m.id AS id_menage, m.noms AS menage, 'Frais Scolaire' AS motif, p.montantPayer, p.resteAPayer, p.dateCreated 
+     FROM paiement p JOIN menage m ON m.id = p.menage WHERE m.status ='actif')
     UNION ALL
-    (SELECT 'Divers' AS nature, pd.id, m.noms AS menage, COALESCE(s.description, pd.type_frais) AS motif, pd.montantPayer, pd.resteAPayer, pd.dateCreated 
+    (SELECT 'Divers' AS nature, pd.id, m.id AS id_menage, m.noms AS menage, COALESCE(s.description, pd.type_frais) AS motif, pd.montantPayer, pd.resteAPayer, pd.dateCreated 
      FROM paiement_divers pd JOIN menage m ON m.id = pd.menage LEFT JOIN scolarite s ON s.id = CAST(pd.type_frais AS UNSIGNED) 
-     WHERE DATE(pd.dateCreated) = CURDATE() AND m.status ='actif')
+     WHERE m.status ='actif')
     ORDER BY dateCreated DESC";
 $resPaiementsJour = $conn->query($sqlJour);
 ?>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<!-- Select2 CSS/JS pour l'autocomplétion -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+<!-- DataTables CSS/JS pour le tri et le filtre -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
 
 <style>
 .badge-scolaire {
@@ -62,6 +71,51 @@ $resPaiementsJour = $conn->query($sqlJour);
 .badge-divers {
     background-color: #fd7e14;
     color: #fff;
+}
+
+.select2-container .select2-selection--single {
+    height: 48px !important;
+    display: flex;
+    align-items: center;
+    border: 1px solid #ced4da;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__arrow {
+    height: 46px !important;
+}
+
+/* Forcer le fond blanc et le texte sombre pour la sélection du ménage (Select2) */
+.select2-container--default .select2-selection--single {
+    background-color: #ffffff !important;
+    color: #212529 !important;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+    color: #212529 !important;
+}
+
+/* Forcer le fond blanc et le texte sombre sur le menu déroulant Select2 */
+.select2-dropdown {
+    background-color: #ffffff !important;
+    color: #212529 !important;
+}
+
+.select2-container--default .select2-results__option {
+    background-color: #ffffff !important;
+    color: #212529 !important;
+}
+
+.select2-container--default .select2-results__option--highlighted[aria-selected] {
+    background-color: #0d6efd !important;
+    /* Couleur d'élément survolé (bleu) */
+    color: #ffffff !important;
+}
+
+/* Forcer le fond blanc pour tous les éléments <select> HTML standard (ex: type de frais divers) */
+select.form-control,
+select.form-control option {
+    background-color: #ffffff !important;
+    color: #212529 !important;
 }
 </style>
 
@@ -108,7 +162,7 @@ $resPaiementsJour = $conn->query($sqlJour);
                                 <div class="col-md-12">
                                     <label for="select_menage_global" class="form-label fw-bold">Sélectionner la Famille
                                         / Ménage :</label>
-                                    <select id="select_menage_global" class="form-control form-control-lg">
+                                    <select id="select_menage_global" class="form-control form-control-lg select2">
                                         <option value="" disabled selected>-- Choisissez une famille --</option>
                                         <?php foreach ($menages as $m): ?>
                                         <option value="<?= $m['id']; ?>"><?= htmlspecialchars($m['noms']); ?></option>
@@ -215,7 +269,6 @@ $resPaiementsJour = $conn->query($sqlJour);
 
                             <!-- HISTORIQUE -->
                             <?php
-                                // Initialisation des variables de calcul
                                 $totalScolaire = 0;
                                 $totalDivers   = 0;
                                 $rows = [];
@@ -237,15 +290,12 @@ $resPaiementsJour = $conn->query($sqlJour);
                                 <div class="col-12">
 
                                     <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
-
                                         <h5 class="card-title mb-0">
                                             <i class="mdi mdi-cash-multiple text-primary me-1"></i>
-                                            Tous les paiements enregistrés aujourd'hui
+                                            Tous les paiements enregistrés
                                         </h5>
 
                                         <div class="d-flex align-items-center gap-2">
-
-                                            <!-- Historique -->
                                             <div class="dropdown">
                                                 <button class="btn btn-primary btn-sm dropdown-toggle" type="button"
                                                     id="historyDropdown" data-bs-toggle="dropdown"
@@ -257,8 +307,8 @@ $resPaiementsJour = $conn->query($sqlJour);
                                                     aria-labelledby="historyDropdown">
                                                     <li>
                                                         <a class="dropdown-item" href="history.php">
-                                                            <i class="mdi mdi-school me-2 text-primary"></i>
-                                                            Historique Frais Scolaires
+                                                            <i class="mdi mdi-school me-2 text-primary"></i> Historique
+                                                            Frais Scolaires
                                                         </a>
                                                     </li>
                                                     <li>
@@ -270,22 +320,31 @@ $resPaiementsJour = $conn->query($sqlJour);
                                                 </ul>
                                             </div>
 
-                                            <!-- Export -->
                                             <button type="button" id="exportJour" class="btn btn-success btn-sm">
-                                                <i class="bi bi-file-earmark-excel me-1"></i>
-                                                Exporter CSV
+                                                <i class="bi bi-file-earmark-excel me-1"></i> Exporter CSV
                                             </button>
                                         </div>
+                                    </div>
 
+                                    <!-- Zone Filtre de Date -->
+                                    <div class="row mb-3 bg-light p-2 rounded align-items-center border">
+                                        <div class="col-md-5 d-flex align-items-center gap-2">
+                                            <label class="fw-bold text-nowrap mb-0">Filtrer par Date :</label>
+                                            <input type="date" id="filterDate" class="form-control form-control-sm">
+                                        </div>
+                                        <div class="col-md-5 d-flex gap-2">
+                                            <button id="btnToday" class="btn btn-sm btn-primary">Aujourd'hui</button>
+                                            <button id="btnAll" class="btn btn-sm btn-secondary">Voir Tout</button>
+                                        </div>
                                     </div>
 
                                     <div class="table-responsive">
-                                        <table class="table table-bordered table-striped" id="tblPaiementsJour">
+                                        <table class="table" id="tblPaiementsJour">
                                             <thead>
-                                                <tr>
-                                                    <th>Type</th>
-                                                    <th>Famille</th>
-                                                    <th>Motif / Frais</th>
+                                                <tr class="text-center">
+                                                    <th>N° Reçu</th>
+                                                    <th>Scolaire / Connexe</th>
+                                                    <th>Code - Famille</th>
                                                     <th>Payé ($)</th>
                                                     <th>Reste ($)</th>
                                                     <th>Date/Heure</th>
@@ -296,52 +355,52 @@ $resPaiementsJour = $conn->query($sqlJour);
                                                 <?php if (!empty($rows)): ?>
                                                 <?php foreach($rows as $p): ?>
                                                 <tr>
+                                                    <td class="text-danger fw-bold">#<?= $p['id']; ?></td>
                                                     <td>
                                                         <span
-                                                            class="badge <?= $p['nature'] === 'Scolaire' ? 'bg-primary' : 'bg-info'; ?>">
-                                                            <?= htmlspecialchars($p['nature']); ?>
+                                                            class="badge <?= $p['motif'] === 'Frais Scolaire' ? 'bg-primary' : 'bg-success'; ?>">
+                                                            <?= htmlspecialchars($p['motif']); ?>
                                                         </span>
                                                     </td>
-                                                    <td><?= htmlspecialchars($p['menage']); ?></td>
-                                                    <td><?= htmlspecialchars($p['motif']); ?></td>
+                                                    <td><?= htmlspecialchars($p['id_menage']); ?> -
+                                                        <?= htmlspecialchars($p['menage']); ?></td>
                                                     <td class="fw-bold text-success">
                                                         <?= number_format((float)$p['montantPayer'], 2); ?> $</td>
                                                     <td class="text-danger">
                                                         <?= number_format((float)$p['resteAPayer'], 2); ?> $</td>
-                                                    <td><?= date('d/m/Y H:i', strtotime($p['dateCreated'])); ?></td>
-                                                    <td>
+                                                    <td data-search="<?= date('Y-m-d', strtotime($p['dateCreated'])); ?>"
+                                                        data-order="<?= strtotime($p['dateCreated']); ?>">
+                                                        <?= date('d/m/Y H:i', strtotime($p['dateCreated'])); ?>
+                                                    </td>
+                                                    <td class="text-center">
                                                         <a href="<?= $p['nature'] === 'Scolaire' ? 'api/apercu_recu.php' : 'api/apercu_recu_divers.php'; ?>?ordre=<?= $p['id']; ?>"
-                                                            class="btn btn-danger btn-sm" target="_blank">Reçu</a>
+                                                            class="btn btn-danger btn-sm" target="_blank">Imprimer
+                                                            Reçu</a>
                                                     </td>
                                                 </tr>
                                                 <?php endforeach; ?>
-                                                <?php else: ?>
-                                                <tr>
-                                                    <td colspan="7" class="text-center text-muted">Aucun versement
-                                                        effectué aujourd'hui.</td>
-                                                </tr>
                                                 <?php endif; ?>
                                             </tbody>
 
-                                            <!-- LIGNES DE TOTAL EN BAS DU TABLEAU -->
                                             <tfoot class="table-light fw-bold">
                                                 <tr>
                                                     <td colspan="3" class="text-end text-uppercase">Total Scolaire :
                                                     </td>
-                                                    <td class="text-primary"><?= number_format($totalScolaire, 2); ?> $
-                                                    </td>
+                                                    <td class="text-primary" id="ftr_scolaire">
+                                                        <?= number_format($totalScolaire, 2); ?> $</td>
                                                     <td colspan="3"></td>
                                                 </tr>
                                                 <tr>
-                                                    <td colspan="3" class="text-end text-uppercase">Total Divers :</td>
-                                                    <td class="text-info"><?= number_format($totalDivers, 2); ?> $</td>
+                                                    <td colspan="3" class="text-end text-uppercase">Total connexe :</td>
+                                                    <td class="text-info" id="ftr_divers">
+                                                        <?= number_format($totalDivers, 2); ?> $</td>
                                                     <td colspan="3"></td>
                                                 </tr>
                                                 <tr>
-                                                    <td colspan="3" class="text-end text-uppercase">Recette Totale du
-                                                        Jour :</td>
-                                                    <td class="text-success"><?= number_format($totalGeneral, 2); ?> $
+                                                    <td colspan="3" class="text-end text-uppercase">Recette Totale :
                                                     </td>
+                                                    <td class="text-success" id="ftr_total">
+                                                        <?= number_format($totalGeneral, 2); ?> $</td>
                                                     <td colspan="3"></td>
                                                 </tr>
                                             </tfoot>
@@ -361,6 +420,94 @@ $resPaiementsJour = $conn->query($sqlJour);
     $(document).ready(function() {
         let currentMenageId = null;
 
+        // Autocomplétion Select2
+        $('#select_menage_global').select2({
+            placeholder: "-- Choisissez une famille --",
+            allowClear: true,
+            width: '100%'
+        });
+
+        // 1. Définition du filtre personnalisé DataTables
+        $.fn.dataTable.ext.search.push(
+            function(settings, data, dataIndex) {
+                let selectedDate = $('#filterDate').val();
+                if (!selectedDate) return true; // Si vide, tout afficher
+
+                let cellNode = table.cell(dataIndex, 5).node();
+                if (!cellNode) return true;
+
+                let rowDate = $(cellNode).attr('data-search');
+                return rowDate === selectedDate;
+            }
+        );
+
+        // 2. Initialisation DataTables
+        let table = $('#tblPaiementsJour').DataTable({
+            language: {
+                url: "//cdn.datatables.net/plug-ins/1.13.6/i18n/fr-FR.json"
+            },
+            order: [
+                [5, 'desc']
+            ],
+            columnDefs: [{
+                orderable: false,
+                targets: [6]
+            }],
+            drawCallback: function() {
+                let api = this.api();
+                let totalScolaire = 0;
+                let totalDivers = 0;
+
+                api.rows({
+                    filter: 'applied'
+                }).data().each(function(row) {
+                    let motif = row[1];
+                    let montantText = row[3].replace('$', '').replace(/,/g, '').trim();
+                    let montant = parseFloat(montantText) || 0;
+
+                    if (motif.includes('Frais Scolaire')) {
+                        totalScolaire += montant;
+                    } else {
+                        totalDivers += montant;
+                    }
+                });
+
+                let totalGeneral = totalScolaire + totalDivers;
+                $('#ftr_scolaire').text(totalScolaire.toFixed(2) + ' $');
+                $('#ftr_divers').text(totalDivers.toFixed(2) + ' $');
+                $('#ftr_total').text(totalGeneral.toFixed(2) + ' $');
+            }
+        });
+
+        // Fonction helper pour récupérer la date du jour (YYYY-MM-DD)
+        function getTodayString() {
+            let today = new Date();
+            let dd = String(today.getDate()).padStart(2, '0');
+            let mm = String(today.getMonth() + 1).padStart(2, '0');
+            let yyyy = today.getFullYear();
+            return yyyy + '-' + mm + '-' + dd;
+        }
+
+        // Par défaut au chargement : afficher Aujourd'hui
+        let todayStr = getTodayString();
+        $('#filterDate').val(todayStr);
+        table.draw();
+
+        // Événements boutons et filtre date
+        $('#filterDate').on('change', function() {
+            table.draw();
+        });
+
+        $('#btnToday').on('click', function() {
+            $('#filterDate').val(getTodayString());
+            table.draw();
+        });
+
+        $('#btnAll').on('click', function() {
+            $('#filterDate').val('');
+            table.draw();
+        });
+
         $('#toggleStatsBtn').on('click', function() {
             $('#heading_stats').toggle();
         });
@@ -368,13 +515,16 @@ $resPaiementsJour = $conn->query($sqlJour);
         // Sélection de la famille / ménage
         $('#select_menage_global').on('change', function() {
             currentMenageId = $(this).val();
-            if (!currentMenageId) return;
+            if (!currentMenageId) {
+                $('#zone_paiement').slideUp();
+                return;
+            }
 
             $('#zone_paiement').slideDown();
             chargerSoldesMenage(currentMenageId);
         });
 
-        // ================= DÉTECTION AUTOMATIQUE DES SOLDES =================
+        // Chargement automatique des soldes
         function chargerSoldesMenage(menageId) {
             $.ajax({
                 url: 'api/get_solde_menage.php',
@@ -389,13 +539,11 @@ $resPaiementsJour = $conn->query($sqlJour);
                         return;
                     }
 
-                    // 1. Mise à jour de la Scolarité
                     let soldeScolaire = parseFloat(response.scolarite.solde_du) || 0;
                     $('#scolaire_montantAPayer').val(soldeScolaire.toFixed(2));
                     $('#scolaire_rPayer').val(soldeScolaire.toFixed(2));
                     $('#scolaire_payer').val('');
 
-                    // 2. Pré-remplissage du Solde Frais Divers
                     let soldeDivers = parseFloat(response.divers.solde_du) || 0;
                     $('#divers_montantAPayer').val(soldeDivers.toFixed(2));
                     $('#divers_rPayer').val(soldeDivers.toFixed(2));
@@ -409,7 +557,7 @@ $resPaiementsJour = $conn->query($sqlJour);
             });
         }
 
-        // ================= CALCUL DYNAMIQUE : SCOLARITÉ =================
+        // Calcul dynamique : Scolarité
         $('#scolaire_payer').on('input', function() {
             let totalSaisie = parseFloat($(this).val()) || 0;
             let globalDue = parseFloat($('#scolaire_montantAPayer').val()) || 0;
@@ -418,21 +566,20 @@ $resPaiementsJour = $conn->query($sqlJour);
             $('#scolaire_rPayer').val(reste.toFixed(2));
         });
 
-        // ================= CALCUL DYNAMIQUE : FRAIS DIVERS =================
+        // Calcul dynamique : Frais Divers
         $('#divers_type_frais').on('change', function() {
             let option = $(this).find('option:selected');
             let fraisDesc = option.data('description');
 
             if (!currentMenageId || !fraisDesc) return;
 
-            // Charger la répartition par enfant si nécessaire
             $.getJSON('api/get_enfants_par_menage_2.php', {
                 menage_id: currentMenageId,
                 scolarite_desc: fraisDesc
             }, function(children) {
                 let html =
                     `<table class="table table-bordered mt-2">
-            <thead><tr><th>Nom</th><th>Classe</th><th>A Payer ($)</th><th>Payé ($)</th><th>Solde ($)</th></tr></thead><tbody>`;
+                    <thead><tr><th>Nom</th><th>Classe</th><th>A Payer ($)</th><th>Payé ($)</th><th>Solde ($)</th></tr></thead><tbody>`;
 
                 if (!children || children.length === 0) {
                     html +=
@@ -487,9 +634,7 @@ $resPaiementsJour = $conn->query($sqlJour);
             $('#divers_rPayer').val(Math.max(0, totalDuce - totalVerser).toFixed(2));
         });
 
-        // =========================================================================
-        // 1. CLIC SUR BTN_SAVE_SCOLAIRE
-        // =========================================================================
+        // Enregistrement Scolaire
         $('#btn_save_scolaire').on('click', function(e) {
             e.preventDefault();
 
@@ -521,17 +666,12 @@ $resPaiementsJour = $conn->query($sqlJour);
                 success: function(res) {
                     $('#btn_save_scolaire').prop('disabled', false).text(
                         'Enregistrer Paiement Scolaire');
-
                     if (res.status === 'success') {
                         alert(res.message);
-
-                        // Ouvrir le reçu
                         if (res.paiement_id) {
                             window.open('api/apercu_recu.php?ordre=' + res.paiement_id,
                                 '_blank');
                         }
-
-                        // Recharge la page pour mettre à jour les statistiques et le tableau
                         location.reload();
                     } else {
                         alert(res.message);
@@ -540,16 +680,12 @@ $resPaiementsJour = $conn->query($sqlJour);
                 error: function(xhr) {
                     $('#btn_save_scolaire').prop('disabled', false).text(
                         'Enregistrer Paiement Scolaire');
-                    console.error("Erreur serveur :", xhr.responseText);
-                    alert('Erreur serveur (' + xhr.status +
-                        '). Vérifiez la console (F12) pour voir le détail PHP.');
+                    alert('Erreur serveur (' + xhr.status + ').');
                 }
             });
         });
 
-        // =========================================================================
-        // 2. CLIC SUR BTN_SAVE_DIVERS
-        // =========================================================================
+        // Enregistrement Divers
         $('#btn_save_divers').on('click', function(e) {
             e.preventDefault();
 
@@ -557,6 +693,7 @@ $resPaiementsJour = $conn->query($sqlJour);
             let scolariteId = $('#divers_type_frais').val();
             let montantPayer = parseFloat($('#divers_payer').val()) || 0;
             let soldeDu = parseFloat($('#divers_montantAPayer').val()) || 0;
+            let observation = $('#divers_observation').val();
 
             if (!menageId) {
                 alert("Veuillez d'abord sélectionner un ménage.");
@@ -571,7 +708,6 @@ $resPaiementsJour = $conn->query($sqlJour);
                 return;
             }
 
-            // Récupération du détail par enfant
             let enfantsData = [];
             $('.divers-eleve-id').each(function(index) {
                 let eleveId = $(this).val();
@@ -593,23 +729,19 @@ $resPaiementsJour = $conn->query($sqlJour);
                     scolarite_id: scolariteId,
                     montant_payer: montantPayer,
                     solde_du: soldeDu,
+                    observation: observation,
                     enfants: JSON.stringify(enfantsData)
                 },
                 dataType: 'json',
                 success: function(res) {
                     $('#btn_save_divers').prop('disabled', false).text(
                         'Enregistrer Frais Divers');
-
                     if (res.status === 'success') {
                         alert(res.message);
-
-                        // Ouvrir le reçu divers
                         if (res.paiement_id) {
                             window.open('api/apercu_recu_divers.php?ordre=' + res
                                 .paiement_id, '_blank');
                         }
-
-                        // Recharge la page pour mettre à jour les statistiques et le tableau
                         location.reload();
                     } else {
                         alert(res.message);
@@ -618,24 +750,32 @@ $resPaiementsJour = $conn->query($sqlJour);
                 error: function(xhr) {
                     $('#btn_save_divers').prop('disabled', false).text(
                         'Enregistrer Frais Divers');
-                    console.error("Erreur serveur :", xhr.responseText);
-                    alert('Erreur serveur (' + xhr.status +
-                        '). Vérifiez la console (F12) pour voir le détail PHP.');
+                    alert('Erreur serveur (' + xhr.status + ').');
                 }
             });
         });
 
         // Export CSV
         $('#exportJour').on('click', function() {
+
             let rows = Array.from(document.querySelectorAll('#tblPaiementsJour tr'));
+
             let csv = rows.map(r => Array.from(r.querySelectorAll('th,td')).map(c => c.innerText.trim())
                 .join(',')).join('\n');
+
             let blob = new Blob([csv], {
                 type: 'text/csv;charset=utf-8;'
             });
+
             let a = document.createElement('a');
             a.href = URL.createObjectURL(blob);
-            a.download = 'paiements_du_jour.csv';
+
+            // Date du jour
+            let date = new Date();
+            let jour = String(date.getDate()).padStart(2, '0');
+            let mois = String(date.getMonth() + 1).padStart(2, '0');
+            let annee = date.getFullYear();
+            a.download = `paiements_du_jour_${jour}_${mois}_${annee}.csv`;
             a.click();
         });
     });

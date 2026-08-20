@@ -70,16 +70,16 @@ function executer_requete_archive($con, $sql) {
 $classes = executer_requete_archive($con, "SELECT * FROM archive_classe WHERE archive_id = $archive_id ORDER BY description ASC");
 
 // Registre des élèves
-$eleves = executer_requete_archive($con, "SELECT * FROM archive_eleve WHERE archive_id = $archive_id ORDER BY nom ASC, prenom ASC LIMIT 300");
+$eleves = executer_requete_archive($con, "SELECT * FROM archive_eleve WHERE archive_id = $archive_id ORDER BY nom ASC, prenom ASC");
 
 // Registre des ménages / parents
-$menages = executer_requete_archive($con, "SELECT * FROM archive_menage WHERE archive_id = $archive_id ORDER BY noms ASC LIMIT 200");
+$menages = executer_requete_archive($con, "SELECT * FROM archive_menage WHERE archive_id = $archive_id ORDER BY noms ASC");
 
 // Grand livre des dépenses validées
 $depenses = executer_requete_archive($con, "SELECT * FROM archive_depenses WHERE archive_id = $archive_id ORDER BY id DESC");
 
 // Journal des paiements scolaires principaux
-$paiements = executer_requete_archive($con, "SELECT * FROM archive_paiement WHERE archive_id = $archive_id ORDER BY dateCreated DESC LIMIT 200");
+$paiements = executer_requete_archive($con, "SELECT * FROM archive_paiement WHERE archive_id = $archive_id ORDER BY dateCreated DESC");
 ?>
 
 <!DOCTYPE html>

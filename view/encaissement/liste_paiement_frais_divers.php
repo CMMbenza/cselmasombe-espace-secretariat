@@ -320,14 +320,14 @@ if ($export === 'xls') {
                             <table class="table align-middle" id="myTable">
                                 <thead>
                                     <?php
-                    $toggleDir = ($dir === 'asc') ? 'desc' : 'asc';
-                    $makeSort = function(string $key, string $label) use ($toggleDir, $sort, $dir) {
-                      $icon = '';
-                      if ($sort === $key) $icon = $dir === 'asc' ? ' ▲' : ' ▼';
-                      $qs = keep_qs(['sort'=>$key, 'dir'=>($sort===$key ? $toggleDir : 'asc')]);
-                      return '<a href="?'.$qs.'" class="text-decoration-none">'.$label.$icon.'</a>';
-                    };
-                  ?>
+                                      $toggleDir = ($dir === 'asc') ? 'desc' : 'asc';
+                                      $makeSort = function(string $key, string $label) use ($toggleDir, $sort, $dir) {
+                                        $icon = '';
+                                        if ($sort === $key) $icon = $dir === 'asc' ? ' ▲' : ' ▼';
+                                        $qs = keep_qs(['sort'=>$key, 'dir'=>($sort===$key ? $toggleDir : 'asc')]);
+                                        return '<a href="?'.$qs.'" class="text-decoration-none">'.$label.$icon.'</a>';
+                                      };
+                                    ?>
                                     <tr>
                                         <th><?php echo $makeSort('id','ID'); ?></th>
                                         <th><?php echo $makeSort('menage_nom','Ménage (Nom)'); ?></th>
@@ -366,7 +366,7 @@ if ($export === 'xls') {
                                         <td><?php echo e(fmt_ts($r['dateCreated'])); ?></td>
                                         <td>
                                             <a class="btn btn-danger"
-                                               href="apercu_recu_divers.php?ordre=<?php echo (int)$r['id']; ?>">
+                                               href="api/apercu_recu_divers.php?ordre=<?php echo (int)$r['id']; ?>">
                                                Imprimer
                                             </a>
                                         </td>

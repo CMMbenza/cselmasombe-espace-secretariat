@@ -18,7 +18,6 @@ $eleveEdit = null;
 if (isset($_GET['id']) && ctype_digit($_GET['id'])) {
     $isEdit = true;
     $editId = (int)$_GET['id'];
-    // Récupération de l'élève pour pré-remplir
     $sqlEdit = "SELECT e.*, 
                        m.noms AS menage_noms, 
                        m.montantAPayer AS menage_montant_usd, 
@@ -35,10 +34,9 @@ if (isset($_GET['id']) && ctype_digit($_GET['id'])) {
     $stmt->close();
 }
 
-// ====== Prise en charge du paramètre id_menage ======
+// ====== Paramètre id_menage ======
 $id_menage = isset($_GET['id_menage']) && ctype_digit($_GET['id_menage']) ? (int)$_GET['id_menage'] : null;
 
-// Si en mode édition sans id_menage dans l'URL, on prend celui de l'élève
 if ($isEdit && $eleveEdit && !$id_menage) {
     $id_menage = (int)$eleveEdit['menage'];
 }
@@ -47,14 +45,12 @@ $enfantsMenage = [];
 $selectedMenageInfo = null;
 
 if ($id_menage) {
-    // Infos du ménage sélectionné (USD & FC)
     $stmtM = $conn->prepare("SELECT id, noms, montantAPayer, montantAPayerFC FROM menage WHERE id = ?");
     $stmtM->bind_param("i", $id_menage);
     $stmtM->execute();
     $selectedMenageInfo = $stmtM->get_result()->fetch_assoc();
     $stmtM->close();
 
-    // Recherche des élèves du ménage
     $sqlKids = "SELECT e.*, 
                        c.description AS classe_desc, 
                        cy.description AS cycle_desc 
@@ -73,7 +69,7 @@ if ($id_menage) {
     $stmtK->close();
 }
 
-// ====== Liste des Ménages (familles) avec montants USD & FC ======
+// ====== Liste des Ménages ======
 $sql = "SELECT id, noms, montantAPayer, montantAPayerFC FROM menage WHERE anneeScolaire = ? ORDER BY noms";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("s", $annee_scolaire);
@@ -83,7 +79,7 @@ $products = [];
 while ($row = $result->fetch_assoc()) $products[] = $row;
 $stmt->close();
 
-// ====== Classes & frais scolarité / connexe via le cycle ======
+// ====== Classes & Frais ======
 $sqlClasses = "
     SELECT 
         cls.id AS idClasse, 
@@ -107,7 +103,6 @@ while ($row = $rstClass->fetch_assoc()) {
 
 $conn->close();
 
-// Génération dynamique de l'URL d'action
 $queryParams = [];
 if ($isEdit) $queryParams[] = 'id=' . (int)$eleveEdit['id'];
 if ($id_menage) $queryParams[] = 'id_menage=' . (int)$id_menage;
@@ -117,7 +112,6 @@ $formAction = $_SERVER['PHP_SELF'] . (!empty($queryParams) ? '?' . implode('&', 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
 $(document).ready(function() {
-    // --- Mettre à jour montants Ménage (USD & FC) ---
     $('#select_product').on('change', function() {
         var opt = $(this).find('option:selected');
         var priceUsd = opt.data('price-usd');
@@ -126,7 +120,6 @@ $(document).ready(function() {
         $('#menage_montant_fc').val(priceFc !== undefined ? priceFc : '');
     });
 
-    // --- Mettre à jour Frais Scolaire et Frais Connexe de l'Élève ---
     $('#classe').on('change', function() {
         var opt = $(this).find('option:selected');
         var fraisScolaire = opt.data('frais-scolaire');
@@ -136,12 +129,30 @@ $(document).ready(function() {
         $('#eleve_montant_fc').val(fraisConnexe !== undefined ? fraisConnexe : '');
     });
 
-    // Auto-trigger si ménage pré-sélectionné
+    // Génération dynamique du matricule (Preview) lors de la saisie
+    function updateMatriculePreview() {
+        <?php if (!$isEdit): ?>
+        var nom = $('#nom').val().trim();
+        var postnom = $('#postnom').val().trim();
+        var prenom = $('#prenom').val().trim();
+
+        var iNom = nom.length > 0 ? nom.charAt(0).toUpperCase() : 'X';
+        var iPostnom = postnom.length > 0 ? postnom.charAt(0).toUpperCase() : 'X';
+        var iPrenom = prenom.length > 0 ? prenom.charAt(0).toUpperCase() : 'X';
+
+        var anneeCourt = new Date().getFullYear().toString().slice(-2); // Renvoie "26"
+
+        var preview = 'ID-' + iNom + iPostnom + iPrenom + anneeCourt;
+        $('#matricule_preview').val(preview);
+        <?php endif; ?>
+    }
+
+    $('#nom, #postnom, #prenom').on('input', updateMatriculePreview);
+
     if ($('#select_product').val() && $('#select_product').val() !== '#') {
         $('#select_product').trigger('change');
     }
 
-    // Pré-remplissage en mode édition
     <?php if ($isEdit && $eleveEdit): ?>
     $('#genre').val('<?php echo addslashes($eleveEdit['genre']); ?>');
     $('#select_product').val('<?php echo (int)$eleveEdit['menage']; ?>').trigger('change');
@@ -180,21 +191,28 @@ $(document).ready(function() {
                                 Enfants enregistrés pour la famille :
                                 <strong><?php echo e($selectedMenageInfo['noms'] ?? 'Ménage #'.$id_menage); ?></strong>
                             </h4>
-                            <span class="badge bg-primary fs-6">
-                                <?php echo count($enfantsMenage); ?> enfant(s) inscrit(s)
-                            </span>
+                            <div>
+                                <a href="create-update.php?id_menage=<?php echo (int)$id_menage; ?>"
+                                    class="btn btn-sm btn-success me-2">
+                                    <i class="mdi mdi-plus-circle me-1"></i> Ajouter un élève dans cette famille
+                                </a>
+                                <span class="badge bg-primary fs-6">
+                                    <?php echo count($enfantsMenage); ?> enfant(s) inscrit(s)
+                                </span>
+                            </div>
                         </div>
 
                         <div class="table-responsive">
-                            <table class="table table-responsive">
+                            <table class="table align-middle">
                                 <thead>
                                     <tr>
                                         <th>#</th>
+                                        <th>Matricule</th>
                                         <th>Nom Complet</th>
                                         <th>Genre</th>
                                         <th>Classe</th>
                                         <th>Lieu & Date Naiss.</th>
-                                        <th>Action</th>
+                                        <th class="text-center">Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -202,18 +220,25 @@ $(document).ready(function() {
                                     <tr
                                         class="<?php echo ($isEdit && (int)$eleveEdit['id'] === (int)$enfant['id']) ? 'table-secondary' : ''; ?>">
                                         <td><?php echo $index + 1; ?></td>
+                                        <td><span
+                                                class="badge bg-outline-dark text-dark fw-bold"><?php echo e($enfant['matricule']); ?></span>
+                                        </td>
                                         <td><strong><?php echo e($enfant['nom'] . ' ' . $enfant['postnom'] . ' ' . $enfant['prenom']); ?></strong>
                                         </td>
-                                        <td><span
-                                                class="badge bg-primary"><?php echo e($enfant['genre']); ?></span>
+                                        <td><span class="badge bg-primary"><?php echo e($enfant['genre']); ?></span>
                                         </td>
                                         <td><?php echo e($enfant['classe_desc'] . ' ' . $enfant['cycle_desc']); ?></td>
                                         <td><?php echo e($enfant['lieu']); ?>,
                                             <?php echo e($enfant['dateDeNaissance']); ?></td>
-                                        <td>
-                                            <a href="create-update.php?id=<?php echo (int)$enfant['id']; ?>&id_menage=<?php echo (int)$id_menage; ?>"
-                                                class="btn btn-sm btn-warning">
+                                        <td class="text-center">
+                                            <a href="create-update.php?id=<?php echo (int)$enfant['id']; ?>&id_menage=<?php echo (int)$id_menage; ?>#formUpdateEleve"
+                                                class="btn btn-sm btn-warning me-1">
                                                 <i class="mdi mdi-pencil"></i> Modifier
+                                            </a>
+                                            <a href="../../webapp/service/eleve.service.create.update.php?action=delete_eleve&id=<?php echo (int)$enfant['id']; ?>&id_menage=<?php echo (int)$id_menage; ?>"
+                                                class="btn btn-sm btn-danger"
+                                                onclick="return confirm('Êtes-vous sûr de vouloir retirer cet enfant ? Les montants de la famille seront automatiquement mis à jour.');">
+                                                <i class="mdi mdi-delete"></i> Retirer
                                             </a>
                                         </td>
                                     </tr>
@@ -229,8 +254,8 @@ $(document).ready(function() {
 
         <!-- FORMULAIRE PRINCIPAL -->
         <form action="<?php echo $formAction; ?>" method="post" role="form">
-            <div class="row">
-                <!-- CÔTÉ ÉLÈVE (Profil Élève + Classe + Frais Élève) -->
+            <div class="row" id="formUpdateEleve">
+                <!-- CÔTÉ ÉLÈVE -->
                 <div class="col-lg-7 col-sm-12 grid-margin">
                     <input type="hidden" name="eleve_id" value="<?php echo $isEdit ? (int)$eleveEdit['id'] : ''; ?>">
 
@@ -251,8 +276,24 @@ $(document).ready(function() {
                                 ?>
                             </h4>
 
-                            <div class="row">
+                            <!-- CHAMP MATRICULE DYNAMIQUE / CONDITIONNEL -->
+                            <?php if (!$isEdit): ?>
+                            <!-- MASQUÉ LORS DE L'ÉDITION, AFFICHÉ UNIQUEMENT LORS DE LA CRÉATION (`id_menage=val`) -->
+                            <div class="row mb-3">
                                 <div class="col-lg-12 col-sm-12">
+                                    <div class="form-group">
+                                        <label class="form-label text-primary fw-bold">Matricule</label>
+                                        <input type="text" id="matricule_preview"
+                                            class="form-control fw-bold text-primary" value="ID-XXX-26" readonly>
+                                        <small class="text-muted text-danger">Généré automatiquement selon vos initiales au fur et à
+                                            mesure de la saisie.</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <?php endif; ?>
+
+                            <div class="row">
+                                <div class="col-lg-4 col-sm-12">
                                     <div class="form-group">
                                         <label class="form-label">Nom</label>
                                         <input type="text" class="form-control" name="nom" id="nom"
@@ -261,10 +302,8 @@ $(document).ready(function() {
                                             required>
                                     </div>
                                 </div>
-                            </div>
-
-                            <div class="row">
-                                <div class="col-lg-12 col-sm-12">
+                                
+                                <div class="col-lg-4 col-sm-12">
                                     <div class="form-group">
                                         <label class="form-label">Post nom</label>
                                         <input type="text" class="form-control" name="postnom" id="postnom"
@@ -273,10 +312,8 @@ $(document).ready(function() {
                                             oninput="this.value = this.value.toUpperCase();" required>
                                     </div>
                                 </div>
-                            </div>
-
-                            <div class="row">
-                                <div class="col-lg-12 col-sm-12">
+                                
+                                <div class="col-lg-4 col-sm-12">
                                     <div class="form-group">
                                         <label class="form-label">Prénom</label>
                                         <input type="text" class="form-control" name="prenom" id="prenom"
@@ -297,6 +334,15 @@ $(document).ready(function() {
                                             <option value="M">M</option>
                                             <option value="F">F</option>
                                         </select>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6 col-sm-12">
+                                    <div class="form-group">
+                                        <label class="form-label">Nationalité</label>
+                                        <input type="text" class="form-control" name="nationalite" id="nationalite"
+                                            value="<?php echo $isEdit ? e($eleveEdit['nationalite'] ?? 'CONGOLAISE') : 'CONGOLAISE'; ?>"
+                                            placeholder="Nationalité" oninput="this.value = this.value.toUpperCase();"
+                                            required>
                                     </div>
                                 </div>
                             </div>
@@ -323,7 +369,6 @@ $(document).ready(function() {
                                 </div>
                             </div>
 
-                            <!-- Sélection Classe & Frais Élève -->
                             <hr class="my-3">
                             <h5 class="text-dark mb-3">Scolarité & Tarification Élève</h5>
 
@@ -332,9 +377,8 @@ $(document).ready(function() {
                                     <label class="form-label">Classe</label>
                                     <div class="d-flex align-items-center">
                                         <select class="form-control" name="classe" id="classe" required>
-                                            <option value="#" disabled <?php echo !$isEdit ? 'selected' : ''; ?>>
-                                                Définir la classe de l'élève
-                                            </option>
+                                            <option value="#" disabled <?php echo !$isEdit ? 'selected' : ''; ?>>Définir
+                                                la classe de l'élève</option>
                                             <?php foreach ($row_classe as $product): ?>
                                             <option value="<?= $product['idClasse']; ?>"
                                                 data-frais-scolaire="<?= $product['frais_scolaire']; ?>"
@@ -346,8 +390,7 @@ $(document).ready(function() {
                                             <?php endforeach; ?>
                                         </select>
                                         <span class="input-group-append ms-2">
-                                            <a href="../classe/create-update.php" class="btn btn-primary"
-                                                type="button">Ajouter</a>
+                                            <a href="../classe/create-update.php" class="btn btn-primary">Ajouter</a>
                                         </span>
                                     </div>
                                 </div>
@@ -370,7 +413,6 @@ $(document).ready(function() {
                                             id="eleve_montant_fc"
                                             value="<?php echo $isEdit ? e($eleveEdit['montantAPayerFC'] ?? '') : ''; ?>"
                                             placeholder="Frais connexe ($)">
-                                            <!-- readonly -->
                                     </div>
                                 </div>
                             </div>
@@ -407,8 +449,7 @@ $(document).ready(function() {
                                             <?php endforeach; ?>
                                         </select>
                                         <span class="input-group-append ms-2">
-                                            <a href="../menage/create-update.php" class="btn btn-primary"
-                                                type="button">Ajouter</a>
+                                            <a href="../menage/create-update.php" class="btn btn-primary">Ajouter</a>
                                         </span>
                                     </div>
                                 </div>
@@ -456,6 +497,5 @@ $(document).ready(function() {
         </form>
 
     </div>
-    <!-- content-wrapper ends -->
 
     <?php require_once ('../../layouts/constants/footer.php'); ?>

@@ -55,7 +55,7 @@ if (isset($_GET['ajax']) && $_GET['ajax'] === 'table') {
     <td><?= number_format((float)$row['resteAPayer'], 2, '.', ' ') ?> $</td>
     <td class="text-danger"><?= htmlspecialchars($row['observation']); ?></td>
     <td><?= htmlspecialchars($row['dateCreated']); ?></td>
-    <td><a href="apercu_recu.php?ordre=<?= (int)$row['id']; ?>" class="btn btn-danger">Imprimer</a></td>
+    <td><a href="api/apercu_recu.php?ordre=<?= (int)$row['id']; ?>" class="btn btn-danger">Imprimer</a></td>
     <td>
         <button class="btn btn-outline-warning btn-annuler"
                 data-recu-id="<?= (int)$row['id']; ?>"
@@ -255,7 +255,7 @@ if (isset($_GET['ajax']) && $_GET['ajax'] === 'table') {
                                         <td><?= number_format((float)$row['resteAPayer'], 2, '.', ' ') ?> $</td>
                                         <td class="text-danger"><?= htmlspecialchars($row['observation']); ?></td>
                                         <td><?= htmlspecialchars($row['dateCreated']); ?></td>
-                                        <td><a href="apercu_recu.php?ordre=<?= (int)$row['id']; ?>"
+                                        <td><a href="api/apercu_recu.php?ordre=<?= (int)$row['id']; ?>"
                                                 class="btn btn-danger">Imprimer</a></td>
                                         <td>
                                             <button class="btn btn-outline-warning btn-annuler"

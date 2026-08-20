@@ -31,6 +31,7 @@ require_once('../../../webapp/database/config.php');
 
 // Conversion et formatage
 $formattedDate = date("d/m/Y", strtotime($date));
+$derniereChiffreDeLAnnee = date('y');
 ?>
 
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
@@ -38,141 +39,141 @@ $formattedDate = date("d/m/Y", strtotime($date));
 <meta name="robots" content="noindex,nofollow" />
 <meta name="viewport" content="width=device-width; initial-scale=1.0;" />
 <style type="text/css">
-    @import url(https://fonts.googleapis.com/css?family=Open+Sans:400,700);
+@import url(https://fonts.googleapis.com/css?family=Open+Sans:400,700);
 
+body {
+    margin: 0;
+    padding: 0;
+    background: #e1e1e1;
+}
+
+div,
+p,
+a,
+li,
+td {
+    -webkit-text-size-adjust: none;
+}
+
+.ReadMsgBody {
+    width: 100%;
+    background-color: #ffffff;
+}
+
+.ExternalClass {
+    width: 100%;
+    background-color: #ffffff;
+}
+
+body {
+    width: 100%;
+    height: 100%;
+    background-color: #e1e1e1;
+    margin: 0;
+    padding: 0;
+    -webkit-font-smoothing: antialiased;
+}
+
+html {
+    width: 100%;
+}
+
+p {
+    padding: 0 !important;
+    margin-top: 0 !important;
+    margin-right: 0 !important;
+    margin-bottom: 0 !important;
+    margin-left: 0 !important;
+}
+
+.visibleMobile {
+    display: none;
+}
+
+.hiddenMobile {
+    display: block;
+}
+
+@media only screen and (max-width: 600px) {
     body {
-        margin: 0;
+        width: auto !important;
+    }
+
+    table[class=fullTable] {
+        width: 96% !important;
+        clear: both;
+    }
+
+    table[class=fullPadding] {
+        width: 85% !important;
+        clear: both;
+    }
+
+    table[class=col] {
+        width: 45% !important;
+    }
+
+    .erase {
+        display: none;
+    }
+}
+
+@media only screen and (max-width: 420px) {
+    table[class=fullTable] {
+        width: 100% !important;
+        clear: both;
+    }
+
+    table[class=fullPadding] {
+        width: 85% !important;
+        clear: both;
+    }
+
+    table[class=col] {
+        width: 100% !important;
+        clear: both;
+    }
+
+    table[class=col] td {
+        text-align: left !important;
+    }
+
+    .erase {
+        display: none;
+        font-size: 0;
+        max-height: 0;
+        line-height: 0;
         padding: 0;
-        background: #e1e1e1;
-    }
-
-    div,
-    p,
-    a,
-    li,
-    td {
-        -webkit-text-size-adjust: none;
-    }
-
-    .ReadMsgBody {
-        width: 100%;
-        background-color: #ffffff;
-    }
-
-    .ExternalClass {
-        width: 100%;
-        background-color: #ffffff;
-    }
-
-    body {
-        width: 100%;
-        height: 100%;
-        background-color: #e1e1e1;
-        margin: 0;
-        padding: 0;
-        -webkit-font-smoothing: antialiased;
-    }
-
-    html {
-        width: 100%;
-    }
-
-    p {
-        padding: 0 !important;
-        margin-top: 0 !important;
-        margin-right: 0 !important;
-        margin-bottom: 0 !important;
-        margin-left: 0 !important;
     }
 
     .visibleMobile {
-        display: none;
+        display: block !important;
     }
 
     .hiddenMobile {
-        display: block;
+        display: none !important;
     }
+}
 
-    @media only screen and (max-width: 600px) {
-        body {
-            width: auto !important;
-        }
+.btn {
+    position: relative;
+    margin-left: 35%;
+    width: 30%;
+    height: 50px;
+}
 
-        table[class=fullTable] {
-            width: 96% !important;
-            clear: both;
-        }
-
-        table[class=fullPadding] {
-            width: 85% !important;
-            clear: both;
-        }
-
-        table[class=col] {
-            width: 45% !important;
-        }
-
-        .erase {
-            display: none;
-        }
-    }
-
-    @media only screen and (max-width: 420px) {
-        table[class=fullTable] {
-            width: 100% !important;
-            clear: both;
-        }
-
-        table[class=fullPadding] {
-            width: 85% !important;
-            clear: both;
-        }
-
-        table[class=col] {
-            width: 100% !important;
-            clear: both;
-        }
-
-        table[class=col] td {
-            text-align: left !important;
-        }
-
-        .erase {
-            display: none;
-            font-size: 0;
-            max-height: 0;
-            line-height: 0;
-            padding: 0;
-        }
-
-        .visibleMobile {
-            display: block !important;
-        }
-
-        .hiddenMobile {
-            display: none !important;
-        }
-    }
-
-    .btn {
-        position: relative;
-        margin-left: 35%;
-        width: 30%;
-        height: 50px;
-    }
-
-    @media print {
-
-        .hidden_print,
-        .hidden_print * {
-            display: none !important
-        }
-    }
+@media print {
 
     .hidden_print,
     .hidden_print * {
         display: none !important
     }
+}
+
+.hidden_print,
+.hidden_print * {
+    display: none !important
+}
 </style>
 
 
@@ -242,8 +243,9 @@ $formattedDate = date("d/m/Y", strtotime($date));
                                                     <tr>
                                                         <td
                                                             style="font-size: 20px; color: #ff0000; letter-spacing: -1px; font-family: 'Open Sans', sans-serif; line-height: 1; vertical-align: top; text-align: right;">
-                                                            Reçu N°
-                                                            <?php echo $codeRecu;?>/25
+                                                            N° Reçu :
+                                                            <?php echo $codeRecu;?>/
+                                                            <?php echo $derniereChiffreDeLAnnee;?>
                                                         </td>
                                                     </tr>
                                                     <tr>
@@ -322,8 +324,10 @@ $formattedDate = date("d/m/Y", strtotime($date));
                                             <tr>
                                                 <td style="font-size: 20px; font-family: 'Open Sans', sans-serif; color: #ff0000;  line-height: 18px;  vertical-align: top; padding:10px 0;"
                                                     class="article">
-                                                    <?php echo $codeMenage;?> -
-                                                    <?php echo $menage;?>
+                                                    <?php echo $codeMenage;?> - <?php echo $menage;?>
+                                                    <div style="font-size:13px;color:#646a6e;margin-top:4px;">
+                                                        Type de frais : <strong>Frais scolaire</strong>
+                                                    </div>
                                                 </td>
                                                 <td
                                                     style="font-size: 20px; font-family: 'Open Sans', sans-serif; color: #646a6e;  line-height: 18px;  vertical-align: top; padding:10px 0;">
@@ -409,7 +413,7 @@ $formattedDate = date("d/m/Y", strtotime($date));
                                                     style="font-size: 20px; font-family: 'Open Sans', sans-serif; color: #b0b0b0; line-height: 22px; vertical-align: top; text-align:right; ">
                                                     <small><?php echo $observation;?></small>
                                                 </td>
-                                            </tr> 
+                                            </tr>
                                         </tbody>
                                     </table>
                                     <!-- /Table Total -->
@@ -423,165 +427,6 @@ $formattedDate = date("d/m/Y", strtotime($date));
         </tbody>
     </table>
     <!-- /Total -->
-    <!-- Information -->
-    <!-- <table width="100%" border="0" cellpadding="0" cellspacing="0" align="center" class="fullTable" bgcolor="#e1e1e1">
-    <tbody>
-        <tr>
-            <td>
-                <table width="600" border="0" cellpadding="0" cellspacing="0" align="center" class="fullTable"
-                    bgcolor="#ffffff">
-                    <tbody>
-                        <tr>
-                        <tr class="hiddenMobile">
-                            <td height="60"></td>
-                        </tr>
-                        <tr class="visibleMobile">
-                            <td height="40"></td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <table width="480" border="0" cellpadding="0" cellspacing="0" align="center"
-                                    class="fullPadding">
-                                    <tbody>
-                                        <tr>
-                                            <td>
-                                                <table width="220" border="0" cellpadding="0" cellspacing="0"
-                                                    align="left" class="col">
-
-                                                    <tbody>
-                                                        <tr>
-                                                            <td
-                                                                style="font-size: 11px; font-family: 'Open Sans', sans-serif; color: #5b5b5b; line-height: 1; vertical-align: top; ">
-                                                                <strong>BILLING INFORMATION</strong>
-                                                            </td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td width="100%" height="10"></td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td
-                                                                style="font-size: 12px; font-family: 'Open Sans', sans-serif; color: #5b5b5b; line-height: 20px; vertical-align: top; ">
-                                                                Philip Brooks<br> Public Wales, Somewhere<br> New York
-                                                                NY<br> 4468, United States<br> T: 202-555-0133
-                                                            </td>
-                                                        </tr>
-                                                    </tbody>
-                                                </table>
-
-
-                                                <table width="220" border="0" cellpadding="0" cellspacing="0"
-                                                    align="right" class="col">
-                                                    <tbody>
-                                                        <tr class="visibleMobile">
-                                                            <td height="20"></td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td
-                                                                style="font-size: 11px; font-family: 'Open Sans', sans-serif; color: #5b5b5b; line-height: 1; vertical-align: top; ">
-                                                                <strong>PAYMENT METHOD</strong>
-                                                            </td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td width="100%" height="10"></td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td
-                                                                style="font-size: 12px; font-family: 'Open Sans', sans-serif; color: #5b5b5b; line-height: 20px; vertical-align: top; ">
-                                                                Credit Card<br> Credit Card Type: Visa<br> Worldpay
-                                                                Transaction ID: <a href="#"
-                                                                    style="color: #ff0000; text-decoration:underline;">4185939336</a><br>
-                                                                <a href="#" style="color:#b0b0b0;">Right of
-                                                                    Withdrawal</a>
-                                                            </td>
-                                                        </tr>
-                                                    </tbody>
-                                                </table>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <table width="480" border="0" cellpadding="0" cellspacing="0" align="center"
-                                    class="fullPadding">
-                                    <tbody>
-                                        <tr>
-                                            <td>
-                                                <table width="220" border="0" cellpadding="0" cellspacing="0"
-                                                    align="left" class="col">
-                                                    <tbody>
-                                                        <tr class="hiddenMobile">
-                                                            <td height="35"></td>
-                                                        </tr>
-                                                        <tr class="visibleMobile">
-                                                            <td height="20"></td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td
-                                                                style="font-size: 11px; font-family: 'Open Sans', sans-serif; color: #5b5b5b; line-height: 1; vertical-align: top; ">
-                                                                <strong>SHIPPING INFORMATION</strong>
-                                                            </td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td width="100%" height="10"></td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td
-                                                                style="font-size: 12px; font-family: 'Open Sans', sans-serif; color: #5b5b5b; line-height: 20px; vertical-align: top; ">
-                                                                Sup Inc<br> Another Place, Somewhere<br> New York NY<br>
-                                                                4468, United States<br> T: 202-555-0171
-                                                            </td>
-                                                        </tr>
-                                                    </tbody>
-                                                </table>
-
-
-                                                <table width="220" border="0" cellpadding="0" cellspacing="0"
-                                                    align="right" class="col">
-                                                    <tbody>
-                                                        <tr class="hiddenMobile">
-                                                            <td height="35"></td>
-                                                        </tr>
-                                                        <tr class="visibleMobile">
-                                                            <td height="20"></td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td
-                                                                style="font-size: 11px; font-family: 'Open Sans', sans-serif; color: #5b5b5b; line-height: 1; vertical-align: top; ">
-                                                                <strong>SHIPPING METHOD</strong>
-                                                            </td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td width="100%" height="10"></td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td
-                                                                style="font-size: 12px; font-family: 'Open Sans', sans-serif; color: #5b5b5b; line-height: 20px; vertical-align: top; ">
-                                                                UPS: U.S. Shipping Services
-                                                            </td>
-                                                        </tr>
-                                                    </tbody>
-                                                </table>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </td>
-                        </tr>
-                        <tr class="hiddenMobile">
-                            <td height="60"></td>
-                        </tr>
-                        <tr class="visibleMobile">
-                            <td height="30"></td>
-                        </tr>
-                    </tbody>
-                </table>
-            </td>
-        </tr>
-    </tbody>
-</table> -->
     <!-- /Information -->
     <table width="100%" border="0" cellpadding="0" cellspacing="0" align="center" class="fullTable" bgcolor="#e1e1e1">
 
@@ -597,8 +442,7 @@ $formattedDate = date("d/m/Y", strtotime($date));
                                     <tr>
                                         <td
                                             style="font-size: 16px; color: #5b5b5b; font-family: 'Open Sans', sans-serif; line-height: 16px; vertical-align: top; text-align: left;">
-                                            Valable pour l'année scolaire <br>
-                                            <?php echo $anneeScolaire;?>.
+                                            Valable pour l'année scolaire : <?php echo $anneeScolaire;?>
                                         </td>
                                     </tr>
                                     <tr>
@@ -639,13 +483,13 @@ $formattedDate = date("d/m/Y", strtotime($date));
 
 
 <script>
-    function imprimerDiv() {
-        var contenu = document.getElementById('content').innerHTML; // Récupérer le contenu du div
-        var fenetre = window.open('', '', 'width=600, height=500'); // Ouvrir une nouvelle fenêtre pour l'impression
-        fenetre.document.write('<html><head><title>Impression</title></head><body>');
-        fenetre.document.write(contenu); // Insérer le contenu dans la nouvelle fenêtre
-        fenetre.document.write('</body></html>');
-        fenetre.document.close(); // Fermer le document pour éviter que le code ne se bloque
-        fenetre.print(); // Lancer l'impression
-    }
+function imprimerDiv() {
+    var contenu = document.getElementById('content').innerHTML; // Récupérer le contenu du div
+    var fenetre = window.open('', '', 'width=600, height=500'); // Ouvrir une nouvelle fenêtre pour l'impression
+    fenetre.document.write('<html><head><title>Impression</title></head><body>');
+    fenetre.document.write(contenu); // Insérer le contenu dans la nouvelle fenêtre
+    fenetre.document.write('</body></html>');
+    fenetre.document.close(); // Fermer le document pour éviter que le code ne se bloque
+    fenetre.print(); // Lancer l'impression
+}
 </script>
