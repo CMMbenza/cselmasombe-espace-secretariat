@@ -147,9 +147,9 @@ require_once('../../layouts/navbar/navbar.php');
 
                             <div class="col-12 col-md-6 col-lg-3">
                                 <a class="btn btn-outline-warning w-100"
-                                    href="../ventilation_de_caisse/ventiallation_caisse_frais_scolaire.php">
+                                    href="../ventilation_de_caisse/">
                                     <span class="menu-icon chart"><i class="mdi mdi-chart-pie"></i></span>
-                                    Ventilation scolaire
+                                    Ventilation FS/FC
                                 </a>
                             </div>
 
@@ -159,10 +159,9 @@ require_once('../../layouts/navbar/navbar.php');
                         <div class="row quick-actions g-3 mt-2">
 
                             <div class="col-12 col-md-6 col-lg-3">
-                                <a class="btn btn-outline-warning w-100"
-                                    href="../ventilation_de_caisse/ventiallation_caisse_frais_connexe.php">
+                                <a class="btn btn-outline-warning w-100" href="../statisque_inventaire/">
                                     <span class="menu-icon chart"><i class="mdi mdi-chart-donut"></i></span>
-                                    Ventilation connexes
+                                    Statisque inventaire
                                 </a>
                             </div>
 
@@ -210,6 +209,12 @@ require_once('../../layouts/navbar/navbar.php');
                                 <a class="btn btn-secondary w-100" href="../archivage/">
                                     <span class="menu-icon archive"><i class="mdi mdi-archive"></i></span>
                                     Archivage des données
+                                </a>
+                            </div>
+                            <div class="col-12 col-md-6 col-lg-3">
+                                <a class="btn btn-secondary w-100" href="../archivage/reinscription.php">
+                                    <span class="menu-icon archive"><i class="mdi mdi-archive"></i></span>
+                                    Réinscription
                                 </a>
                             </div>
 

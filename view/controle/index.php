@@ -50,18 +50,18 @@ function fetch_eleves_cycles(mysqli $con, int $menageId): array {
 }
 
 /** Montant “divers de référence” (tarifs scolarite/cycle de l’année ménage : description LIKE diver/connex) */
-function fetch_divers_ref(mysqli $con, int $menageId, string $anneeScolaire): float {
+function fetch_divers_ref(mysqli $con, int $menageId): float {
   $sql = "
     SELECT COALESCE(SUM(s2.montant),0) AS total_divers_tarif
     FROM eleve e
     JOIN classe cl ON e.classe = cl.id
     JOIN cycle  cy ON cl.cycle  = cy.id
-    JOIN scolarite s2 ON s2.cycle = cy.id AND s2.anneeScolaire = ?
+    JOIN scolarite s2 ON s2.cycle = cy.id
     WHERE e.menage = ?
       AND (LOWER(s2.description) LIKE '%diver%' OR LOWER(s2.description) LIKE '%connex%')
   ";
   $st = $con->prepare($sql);
-  $st->bind_param('si', $anneeScolaire, $menageId);
+  $st->bind_param('i', $menageId);
   $st->execute();
   $rs = $st->get_result();
   $val = 0.0;
@@ -71,21 +71,21 @@ function fetch_divers_ref(mysqli $con, int $menageId, string $anneeScolaire): fl
 }
 
 /** Somme “à payer” par tranche (scolarité) pour TOUS les élèves du ménage */
-function fetch_apayer_by_tranche(mysqli $con, int $menageId, string $anneeScolaire): array {
+function fetch_apayer_by_tranche(mysqli $con, int $menageId): array {
   $out = [];
   $sql = "
     SELECT t.numero_tranche AS num, SUM(t.montant) AS total_tranche
     FROM eleve e
     JOIN classe cl ON e.classe = cl.id
     JOIN cycle  cy ON cl.cycle  = cy.id
-    JOIN scolarite s ON s.cycle = cy.id AND s.anneeScolaire = ?
+    JOIN scolarite s ON s.cycle = cy.id
     JOIN tranche   t ON t.frais_id = s.id
     WHERE e.menage = ?
     GROUP BY t.numero_tranche
     ORDER BY t.numero_tranche
   ";
   $st = $con->prepare($sql);
-  $st->bind_param('si', $anneeScolaire, $menageId);
+  $st->bind_param('i', $menageId);
   $st->execute();
   $rs = $st->get_result();
   while ($row = $rs->fetch_assoc()) {

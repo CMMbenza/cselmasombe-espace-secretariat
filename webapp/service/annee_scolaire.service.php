@@ -1,16 +1,32 @@
 <?php
-    require_once('../../webapp/database/config.php');
+require_once('../../webapp/database/config.php');
 
-    $sql = "SELECT * FROM annee_scolaire ORDER BY annee_scolaire.annee_scolaire DESC";
-    $rst = mysqli_query($con, $sql);
+// Enregistrement
+if (isset($_POST['submit'])) {
 
-    if (isset($_POST['submit'])) {
+    $anneeScolaire = mysqli_real_escape_string($con, $_POST['anneeScolaire']);
+    $debut = mysqli_real_escape_string($con, $_POST['debut']);
+    $fin = mysqli_real_escape_string($con, $_POST['fin']);
 
-        $anneeScolaire = $_POST['anneeScolaire'];
-        $debut = $_POST['debut'];
-        $fin = $_POST['fin'];
-        
-        $sql = "INSERT INTO annee_scolaire VALUES (NULL, '$anneeScolaire', '$debut', '$fin', 'Encours')";
-        mysqli_query($con, $sql);
+    $sql = "INSERT INTO annee_scolaire
+            VALUES (NULL, '$anneeScolaire', '$debut', '$fin', 'encours')";
+
+    if (mysqli_query($con, $sql)) {
+
+        // Redirection vers index.php
+        header("Location: ../../view/annee_scolaire/");
+        exit();
+
+    } else {
+
+        echo "Erreur : " . mysqli_error($con);
+
     }
+}
+
+// Liste des années scolaires
+$sql = "SELECT * FROM annee_scolaire
+        ORDER BY annee_scolaire DESC";
+
+$rst = mysqli_query($con, $sql);
 ?>

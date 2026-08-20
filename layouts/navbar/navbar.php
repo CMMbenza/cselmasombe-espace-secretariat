@@ -13,14 +13,16 @@
 </nav>
 <!-- partial -->
 
-<style>.card:hover {
+<style>
+.card:hover {
     transform: translateY(-3px);
     transition: 0.2s ease-in-out;
 }
 
 .card {
     transition: 0.2s ease-in-out;
-}</style>
+}
+</style>
 <!-- partial:partials/_navbar.php -->
 <nav class="navbar p-0 fixed-top d-flex flex-row">
     <div class="navbar-brand-wrapper d-flex d-lg-none align-items-center justify-content-center">
@@ -42,7 +44,8 @@
             </li>
 
             <li class="nav-item menu-items">
-                <a class="nav-link" data-bs-toggle="collapse" href="#ui-basic" aria-expanded="false" aria-controls="ui-basic">
+                <a class="nav-link" data-bs-toggle="collapse" href="#ui-basic" aria-expanded="false"
+                    aria-controls="ui-basic">
                     <span class="menu-icon"><i class="fa fa-users"></i></span>
                     <span class="menu-title">Gestion des élèves</span>
                     <i class="menu-arrow"></i>
@@ -57,7 +60,8 @@
             </li>
 
             <li class="nav-item menu-items">
-                <a class="nav-link" href="../paiement-divers-frais/">
+                <!-- <a class="nav-link" href="../paiement-divers-frais/"> -->
+                <a class="nav-link" href="../encaissement/">
                     <span class="menu-icon"><i class="fa fa-money"></i></span>
                     <span class="menu-title">Scolarité</span>
                 </a>
@@ -87,7 +91,8 @@
             </li>
         </ul>
 
-        <button class="d-none navbar-toggler navbar-toggler-right d-lg-none align-self-center" type="button" data-toggle="offcanvas">
+        <button class="d-none navbar-toggler navbar-toggler-right d-lg-none align-self-center" type="button"
+            data-toggle="offcanvas">
             <span class="mdi mdi-format-line-spacing"></span>
         </button>
     </div>
@@ -96,9 +101,9 @@
 
 <script>
 // Anti Back/Forward Cache : si la page revient depuis l'historique, on force le refresh
-window.addEventListener('pageshow', function (event) {
-  if (event.persisted || (window.performance && performance.getEntriesByType)) {
-    // Certains navigateurs remettent une page du BFCache : on recharge
-    if (event.persisted) location.reload();
-});
+window.addEventListener('pageshow', function(event) {
+            if (event.persisted || (window.performance && performance.getEntriesByType)) {
+                // Certains navigateurs remettent une page du BFCache : on recharge
+                if (event.persisted) location.reload();
+            });
 </script>

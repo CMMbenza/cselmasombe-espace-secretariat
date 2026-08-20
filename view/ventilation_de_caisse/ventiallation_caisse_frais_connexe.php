@@ -80,83 +80,94 @@ sort($allDates);
 $totalEntre=0.0; $totalDep=0.0; $soldeCumul=0.0; $soldeOuverture=0.0;
 ?>
 <div class="main-panel">
-  <div class="content-wrapper">
-    <div class="card">
-      <div class="card-body">
-        <h5 class="card-title d-flex justify-content-between">
-          <span>Ventilation — Caisse Frais Connexe</span>
-          <a href="javascript:history.back()" class="btn btn-light">&lt; Retour</a>
-        </h5>
-        <hr>
+    <div class="content-wrapper">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title d-flex justify-content-between">
+                    <span>Ventilation — Caisse Frais Connexe</span>
+                    <a href="ventiallation_caisse_frais_scolaire.php" class="btn btn-dark">Ventiallation caisse frais
+                        scolaire</a>
+                    <a href="javascript:history.back()" class="btn btn-light">&lt; Retour</a>
+                </h5>
+                <hr>
 
-        <!-- Filtres (facultatif) -->
-        <form class="row g-2 mb-3" method="get">
-          <div class="col-md-3">
-            <label class="form-label">Année scolaire</label>
-            <input type="text" class="form-control" name="annee" placeholder="2024-2025" value="<?= h($anneeScolaire) ?>">
-          </div>
-          <div class="col-md-3">
-            <label class="form-label">Du</label>
-            <input type="date" class="form-control" name="start" value="<?= h($startDate) ?>">
-          </div>
-          <div class="col-md-3">
-            <label class="form-label">Au</label>
-            <input type="date" class="form-control" name="end" value="<?= h($endDate) ?>">
-          </div>
-          <div class="col-md-3 d-flex align-items-end gap-2">
-            <button class="btn btn-primary w-100">Filtrer</button>
-            <a class="btn btn-secondary" href="?">Réinitialiser</a>
-          </div>
-        </form>
+                <!-- Filtres (facultatif) -->
+                <form class="row g-2 mb-3" method="get">
+                    <div class="col-md-3">
+                        <label class="form-label">Année scolaire</label>
+                        <input type="text" class="form-control" name="annee" placeholder="2024-2025"
+                            value="<?= h($anneeScolaire) ?>">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Du</label>
+                        <input type="date" class="form-control" name="start" value="<?= h($startDate) ?>">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Au</label>
+                        <input type="date" class="form-control" name="end" value="<?= h($endDate) ?>">
+                    </div>
+                    <div class="col-md-3 d-flex align-items-end gap-2">
+                        <button class="btn btn-primary w-100">Filtrer</button>
+                        <a class="btn btn-secondary" href="?">Réinitialiser</a>
+                    </div>
+                </form>
 
-        <div class="table-responsive">
-          <table class="table align-middle">
-            <thead>
-              <tr>
-                <th>Date</th>
-                <th class="text-end">Entrées (Frais Connexe)</th>
-                <th class="text-end">Dépenses (Frais Connexe)</th>
-                <th class="text-end">Net</th>
-                <th class="text-end">Solde cumulé</th>
-              </tr>
-            </thead>
-            <tbody>
-              <?php if (empty($allDates)): ?>
-                <tr><td colspan="5"><div class="alert alert-info mb-0">Aucun mouvement.</div></td></tr>
-              <?php else: ?>
-                <?php foreach($allDates as $d):
+                <div class="table-responsive">
+                    <table class="table align-middle">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th class="text-end">Entrées (Frais Connexe)</th>
+                                <th class="text-end">Dépenses (Frais Connexe)</th>
+                                <th class="text-end">Net</th>
+                                <th class="text-end">Solde cumulé</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php if (empty($allDates)): ?>
+                            <tr>
+                                <td colspan="5">
+                                    <div class="alert alert-info mb-0">Aucun mouvement.</div>
+                                </td>
+                            </tr>
+                            <?php else: ?>
+                            <?php foreach($allDates as $d):
                   $e=(float)($datesEntre[$d]??0.0);
                   $x=(float)($datesDep[$d]??0.0);
                   $net=$e-$x; $soldeCumul+=$net; $totalEntre+=$e; $totalDep+=$x;
                 ?>
-                <tr>
-                  <td><?= date_fr($d) ?></td>
-                  <td class="text-end">
-                    <a class="text-decoration-underline fw-semibold" href="detail_ventillation.php?type=connexe&date=<?= urlencode($d) ?>"><?= fmt($e) ?> $</a>
-                  </td>
-                  <td class="text-end">
-                    <a class="text-decoration-underline fw-semibold" href="detail_ventillation.php?type=connexe&date=<?= urlencode($d) ?>"><?= fmt($x) ?> $</a>
-                  </td>
-                  <td class="text-end <?= $net < 0 ? 'text-danger' : '' ?>"><?= fmt($net) ?> $</td>
-                  <td class="text-end"><?= fmt($soldeCumul) ?> $</td>
-                </tr>
-                <?php endforeach; ?>
-              <?php endif; ?>
-            </tbody>
-            <tfoot>
-              <tr>
-                <th>Totaux</th>
-                <th class="text-end"><?= fmt($totalEntre) ?> $</th>
-                <th class="text-end"><?= fmt($totalDep) ?> $</th>
-                <th class="text-end"><?= fmt($totalEntre-$totalDep) ?> $</th>
-                <th class="text-end"><?= fmt($soldeOuverture + ($totalEntre-$totalDep)) ?> $</th>
-              </tr>
-            </tfoot>
-          </table>
-        </div>
+                            <tr>
+                                <td><?= date_fr($d) ?></td>
+                                <td class="text-end">
+                                    <a class="text-decoration-underline fw-semibold"
+                                        href="detail_ventillation.php?type=connexe&date=<?= urlencode($d) ?>"><?= fmt($e) ?>
+                                        $</a>
+                                </td>
+                                <td class="text-end">
+                                    <a class="text-decoration-underline fw-semibold"
+                                        href="detail_ventillation.php?type=connexe&date=<?= urlencode($d) ?>"><?= fmt($x) ?>
+                                        $</a>
+                                </td>
+                                <td class="text-end <?= $net < 0 ? 'text-danger' : '' ?>"><?= fmt($net) ?> $</td>
+                                <td class="text-end"><?= fmt($soldeCumul) ?> $</td>
+                            </tr>
+                            <?php endforeach; ?>
+                            <?php endif; ?>
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <th>Totaux</th>
+                                <th class="text-end"><?= fmt($totalEntre) ?> $</th>
+                                <th class="text-end"><?= fmt($totalDep) ?> $</th>
+                                <th class="text-end"><?= fmt($totalEntre-$totalDep) ?> $</th>
+                                <th class="text-end"><?= fmt($soldeOuverture + ($totalEntre-$totalDep)) ?> $</th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
 
-      </div>
+            </div>
+        </div>
     </div>
-  </div>
 </div>
 <?php require_once('../../layouts/constants/footer.php'); ?>

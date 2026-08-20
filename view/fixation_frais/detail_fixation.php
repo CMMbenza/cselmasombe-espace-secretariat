@@ -1,8 +1,8 @@
 <?php
 // Inclusion de la config de connexion
 require_once('../../webapp/database/config.php'); // suppose que le code de connexion est dans config.php
-require_once ('../../layouts/navbar/navbar.php');
 require_once ('../../layouts/constants/head.php');
+require_once ('../../layouts/navbar/navbar.php');
 
 // Vérifie si le paramètre 'id' est passé
 if (!isset($_GET['cycle']) || !is_numeric($_GET['cycle'])) {

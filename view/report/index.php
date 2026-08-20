@@ -1,5 +1,8 @@
 <?php
 require_once('../../webapp/database/config.php');
+require_once ('../../layouts/constants/head.php'); 
+require_once ('../../webapp/service/annee_scolaire.service.php'); 
+require_once ('../../layouts/navbar/navbar.php');
 
 function h($v){ return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8'); }
 function money($n){ return number_format((float)$n, 2, '.', ' ') . ' $'; }
@@ -37,12 +40,13 @@ if ($isConnexe){
         ORDER BY dte";
   $st=$con->prepare($sql); $st->bind_param('ss',$minDate,$maxDate);
 }else{
-  $sql="SELECT p.dateCreated AS dte, SUM(p.montantPayer) AS tot
+  $sql="SELECT DATE(p.dateCreated) AS dte, SUM(p.montantPayer) AS tot
         FROM paiement p
-        WHERE p.dateCreated BETWEEN ? AND ?
-        GROUP BY p.dateCreated
+        WHERE DATE(p.dateCreated) BETWEEN ? AND ?
+        GROUP BY DATE(p.dateCreated)
         ORDER BY dte";
-  $st=$con->prepare($sql); $st->bind_param('ss',$minDate,$maxDate);
+  $st=$con->prepare($sql); 
+  $st->bind_param('ss',$minDate,$maxDate);
 }
 $st->execute(); $rs=$st->get_result();
 while($r=$rs->fetch_assoc()){
@@ -359,7 +363,7 @@ require_once('../../layouts/navbar/navbar.php');
 
 .btn:hover {
     filter: brightness(0.95);
-    border:1px solid;
+    border: 1px solid;
 }
 
 /* .btn-outline {
@@ -540,6 +544,7 @@ require_once('../../layouts/navbar/navbar.php');
                         </a>
                         <button type="button" class="btn btn-danger" onclick="window.print()">Imprimer
                         </button>
+                        <a href="report_annuel.php" class="btn btn-dark">Report annuel</a>
                     </div>
                 </form>
             </div>
