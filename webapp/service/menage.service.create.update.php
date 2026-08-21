@@ -9,7 +9,7 @@ if (isset($_POST['submit']) || isset($_POST['submit_continue'])) {
   // ===== CREATION =====
   $noms           = s('noms');
   $nom_du_pere    = s('nom_du_pere');
-  $nom_de_la_mere  = s('nom_de_la_mere');
+  $nom_de_la_mere = s('nom_de_la_mere');
   $profesion      = s('profesion');
   $telephone      = s('telephone');
   $numero         = s('numero');
@@ -27,8 +27,10 @@ if (isset($_POST['submit']) || isset($_POST['submit_continue'])) {
           ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'Administrateur(trice)', ?, ?, ?, 'actif', 1)";
           
   $stmt = $con->prepare($sql);
+  
+  // Correction ici : "ssssssssssdss" (13 caractères pour 13 variables)
   $stmt->bind_param(
-    "ssssssssssds", 
+    "ssssssssssdss", 
     $noms, $nom_du_pere, $nom_de_la_mere, $profesion, $telephone, $numero, $avenue, 
     $quartier, $commune, $province, $annee_scolaire, $montantAPayer, $email
   );
@@ -36,9 +38,9 @@ if (isset($_POST['submit']) || isset($_POST['submit_continue'])) {
   $stmt->close();
 
   if (isset($_POST['submit_continue'])) {
-    header("Location: ../../view/eleve/create-update.php?$noms");
+    header("Location: ../../view/eleve/create-update.php?noms=" . urlencode($noms));
   } else {
-    header("Location: ../../view/menage/?$noms");
+    header("Location: ../../view/menage/?noms=" . urlencode($noms));
   }
   exit;
 
@@ -49,7 +51,7 @@ if (isset($_POST['submit']) || isset($_POST['submit_continue'])) {
 
   $noms           = s('noms');
   $nom_du_pere    = s('nom_du_pere');
-  $nom_de_la_mere  = s('nom_de_la_mere');
+  $nom_de_la_mere = s('nom_de_la_mere');
   $profesion      = s('profesion');
   $telephone      = s('telephone');
   $numero         = s('numero');
@@ -57,7 +59,7 @@ if (isset($_POST['submit']) || isset($_POST['submit_continue'])) {
   $quartier       = s('quartier');
   $commune        = s('commune');
   $province       = s('province');
-  $start_tranche  = s('start_tranche');
+  $start_tranche  = (int)s('start_tranche');
   $email          = s('email');
 
   $sql = "UPDATE menage SET
@@ -79,6 +81,8 @@ if (isset($_POST['submit']) || isset($_POST['submit_continue'])) {
           WHERE id = ?";
           
   $stmt = $con->prepare($sql);
+  
+  // Correction ici : "ssssssssssisi" (14 caractères pour 14 variables)
   $stmt->bind_param(
     "sssssssssssisi", 
     $noms, $nom_du_pere, $nom_de_la_mere, $profesion, $telephone, $numero, $avenue, 
@@ -90,7 +94,7 @@ if (isset($_POST['submit']) || isset($_POST['submit_continue'])) {
   if (isset($_POST['update_continue'])) {
     header("Location: ../../view/eleve/create-update.php?id_menage=" . $id); 
   } else {
-    header("Location: ../../view/menage/?$noms");
+    header("Location: ../../view/menage/?noms=" . urlencode($noms));
   }
   exit;
 
@@ -103,13 +107,17 @@ if (isset($_POST['submit']) || isset($_POST['submit_continue'])) {
       die('Statut invalide');
     }
 
-    $sql = "UPDATE menage SET status = '$status' WHERE id = $id";
-    mysqli_query($con, $sql);
+    $stmt = $con->prepare("UPDATE menage SET STATUS = ? WHERE id = ?");
+    $stmt->bind_param("si", $status, $id);
+    $stmt->execute();
+    $stmt->close();
 
-    $sqlEleve = "UPDATE eleve SET status = '$status' WHERE menage = $id";
-    mysqli_query($con, $sqlEleve);
+    $stmtEleve = $con->prepare("UPDATE eleve SET STATUS = ? WHERE menage = ?");
+    $stmtEleve->bind_param("si", $status, $id);
+    $stmtEleve->execute();
+    $stmtEleve->close();
 
-    header("Location: " . $_SERVER['HTTP_REFERER']);
+    header("Location: " . ($_SERVER['HTTP_REFERER'] ?? '../menage/'));
     exit;
   }
 }

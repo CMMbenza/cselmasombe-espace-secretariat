@@ -124,10 +124,11 @@ if (isset($_POST['submit'])) {
     $frais_scolaire_new = to_float($_POST['montant_a_payer'] ?? $_POST['frais_scolaire'] ?? 0.0);
     $frais_connexe_new  = to_float($_POST['montantAPayerFC'] ?? 0.0);
 
-    // Ancien état
+    // Récupération de l'ancien état et du matricule actuel
     $sqlOld = "SELECT menage AS menage_old, 
                       montant_a_payer AS frais_scolaire_old, 
-                      montantAPayerFC AS frais_connexe_old 
+                      montantAPayerFC AS frais_connexe_old,
+                      matricule AS matricule_old 
                  FROM eleve 
                 WHERE id = ?";
     $stmtOld = $con->prepare($sqlOld);
@@ -138,40 +139,53 @@ if (isset($_POST['submit'])) {
     $stmtOld->close();
 
     if (!$rowOld) { return; }
-    $menage_old        = to_int($rowOld['menage_old']);
+    $menage_old         = to_int($rowOld['menage_old']);
     $frais_scolaire_old = to_float($rowOld['frais_scolaire_old']);
     $frais_connexe_old  = to_float($rowOld['frais_connexe_old']);
+    $matricule_old      = trim($rowOld['matricule_old'] ?? '');
 
-    // Mettre à jour l'élève (13 paramètres dans la requête -> "sssssssissddi")
+    // Génération automatique du matricule s'il n'existe pas encore
+    $matricule = $matricule_old;
+    if (empty($matricule_old)) {
+        $iNom     = !empty($nom) ? strtoupper(mb_substr($nom, 0, 1)) : 'X';
+        $iPostnom = !empty($postnom) ? strtoupper(mb_substr($postnom, 0, 1)) : 'X';
+        $iPrenom  = !empty($prenom) ? strtoupper(mb_substr($prenom, 0, 1)) : 'X';
+        $anneeCivil = date('y');
+
+        $matricule = $eleve_id . '-' . $iNom . $iPostnom . $iPrenom . '-' . $anneeCivil;
+    }
+
+    // 14 marqueurs (?) dans la requête SQL
     $sqlUp = "UPDATE eleve 
-                 SET nom=?, postnom=?, prenom=?, genre=?, lieu=?, dateDeNaissance=?, nationalite=?,
+                 SET matricule=?, nom=?, postnom=?, prenom=?, genre=?, lieu=?, dateDeNaissance=?, nationalite=?,
                      classe=?, menage=?, dateUpdate=CURRENT_TIMESTAMP, 
                      anneeScolaire=?, createdby='Administrateur(trice)', 
                      montant_a_payer=?, montantAPayerFC=?
                WHERE id=?";
     $stmtUp = $con->prepare($sqlUp);
     
-    // CORRECTION ICI : "sssssssissddi" (13 caractères de type correspondant aux 13 variables)
-    $stmtUp->bind_param("sssssssissddi", 
-        $nom,               // s (1)
-        $postnom,           // s (2)
-        $prenom,            // s (3)
-        $genre,             // s (4)
-        $lieuDeNaissance,   // s (5)
-        $dateDeNaissance,   // s (6)
-        $nationalite,       // s (7)
-        $classe_new,        // i (8)
-        $menage_new,        // i (9)
-        $annee_scolaire,    // s (10)
-        $frais_scolaire_new,// d (11)
-        $frais_connexe_new, // d (12)
-        $eleve_id           // i (13)
+    // "sssssssssissdd" (14 caractères pour 14 variables)
+    $stmtUp->bind_param("sssssssssissdd", 
+        $matricule,          // s (1)
+        $nom,                // s (2)
+        $postnom,            // s (3)
+        $prenom,             // s (4)
+        $genre,              // s (5)
+        $lieuDeNaissance,    // s (6)
+        $dateDeNaissance,    // s (7)
+        $nationalite,        // s (8)
+        $classe_new,         // i (9)
+        $menage_new,         // i (10)
+        $annee_scolaire,     // s (11)
+        $frais_scolaire_new, // d (12)
+        $frais_connexe_new,  // d (13)
+        $eleve_id            // i (14)
     );
     
     $stmtUp->execute();
     $stmtUp->close();
 
-    // Ajustements sur le ménage
+    // Ajustement des montants de la famille/ménage
     if ($menage_old === $menage_new) {
         $delta_scolaire = $frais_scolaire_new - $frais_scolaire_old;
         $delta_connexe  = $frais_connexe_new - $frais_connexe_old;

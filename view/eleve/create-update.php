@@ -70,13 +70,17 @@ if ($id_menage) {
 }
 
 // ====== Liste des Ménages ======
-$sql = "SELECT id, noms, montantAPayer, montantAPayerFC FROM menage WHERE anneeScolaire = ? ORDER BY noms";
+$sql = "SELECT id, noms, montantAPayer, montantAPayerFC FROM menage ORDER BY noms ASC";
 $stmt = $conn->prepare($sql);
-$stmt->bind_param("s", $annee_scolaire);
+
 $stmt->execute();
 $result = $stmt->get_result();
+
 $products = [];
-while ($row = $result->fetch_assoc()) $products[] = $row;
+while ($row = $result->fetch_assoc()) {
+    $products[] = $row;
+}
+
 $stmt->close();
 
 // ====== Classes & Frais ======
@@ -131,7 +135,7 @@ $(document).ready(function() {
 
     // Génération dynamique du matricule (Preview) lors de la saisie
     function updateMatriculePreview() {
-        <?php if (!$isEdit): ?>
+        <?php if (!$isEdit || empty($eleveEdit['matricule'])): ?>
         var nom = $('#nom').val().trim();
         var postnom = $('#postnom').val().trim();
         var prenom = $('#prenom').val().trim();
@@ -140,9 +144,10 @@ $(document).ready(function() {
         var iPostnom = postnom.length > 0 ? postnom.charAt(0).toUpperCase() : 'X';
         var iPrenom = prenom.length > 0 ? prenom.charAt(0).toUpperCase() : 'X';
 
-        var anneeCourt = new Date().getFullYear().toString().slice(-2); // Renvoie "26"
+        var eleveId = '<?php echo $isEdit ? (int)$eleveEdit['id'] : "ID"; ?>';
+        var anneeCourt = new Date().getFullYear().toString().slice(-2);
 
-        var preview = 'ID-' + iNom + iPostnom + iPrenom + anneeCourt;
+        var preview = eleveId + '-' + iNom + iPostnom + iPrenom + '-' + anneeCourt;
         $('#matricule_preview').val(preview);
         <?php endif; ?>
     }
@@ -168,10 +173,10 @@ $(document).ready(function() {
 
     $('#menage_montant_usd').val(
         '<?php echo isset($eleveEdit['menage_montant_usd']) ? (float)$eleveEdit['menage_montant_usd'] : ''; ?>'
-        );
+    );
     $('#menage_montant_fc').val(
         '<?php echo isset($eleveEdit['menage_montant_fc']) ? (float)$eleveEdit['menage_montant_fc'] : ''; ?>'
-        );
+    );
     <?php endif; ?>
 });
 </script>
@@ -277,16 +282,18 @@ $(document).ready(function() {
                             </h4>
 
                             <!-- CHAMP MATRICULE DYNAMIQUE / CONDITIONNEL -->
-                            <?php if (!$isEdit): ?>
+                            <?php if (!$isEdit || empty($eleveEdit['matricule'])): ?>
                             <!-- MASQUÉ LORS DE L'ÉDITION, AFFICHÉ UNIQUEMENT LORS DE LA CRÉATION (`id_menage=val`) -->
                             <div class="row mb-3">
                                 <div class="col-lg-12 col-sm-12">
                                     <div class="form-group">
                                         <label class="form-label text-primary fw-bold">Matricule</label>
                                         <input type="text" id="matricule_preview"
-                                            class="form-control fw-bold text-primary" value="ID-XXX-26" readonly>
-                                        <small class="text-muted text-danger">Généré automatiquement selon vos initiales au fur et à
-                                            mesure de la saisie.</small>
+                                            class="form-control fw-bold text-primary"
+                                            value="<?php echo ($isEdit && !empty($eleveEdit['matricule'])) ? e($eleveEdit['matricule']) : 'Génération automatique...'; ?>"
+                                            readonly>
+                                        <small class="text-muted text-danger">Un matricule sera attribué automatiquement
+                                            à l'enregistrement.</small>
                                     </div>
                                 </div>
                             </div>
@@ -302,7 +309,7 @@ $(document).ready(function() {
                                             required>
                                     </div>
                                 </div>
-                                
+
                                 <div class="col-lg-4 col-sm-12">
                                     <div class="form-group">
                                         <label class="form-label">Post nom</label>
@@ -312,7 +319,7 @@ $(document).ready(function() {
                                             oninput="this.value = this.value.toUpperCase();" required>
                                     </div>
                                 </div>
-                                
+
                                 <div class="col-lg-4 col-sm-12">
                                     <div class="form-group">
                                         <label class="form-label">Prénom</label>
@@ -456,7 +463,7 @@ $(document).ready(function() {
                             </div>
 
                             <hr class="my-3">
-                            <h5 class="text-dark mb-3">Cotisation Famille</h5>
+                            <h5 class="text-dark mb-3">Situation Famille</h5>
 
                             <div class="row">
                                 <div class="col-lg-12 col-sm-12">
