@@ -82,7 +82,7 @@ table.dataTable thead th {
                                         <th style="width:100px;">ID Famille</th>
                                         <th>Famille</th>
                                         <th>Nbre d'enfants</th>
-                                        <th>Montant à payer</th>
+                                        <th>Frais <span class="text-primary">scolaire</span>/ <span class="text-success">Connexe</span></th>
                                         <th>Téléphone</th>
                                         <th>Localisation</th>
                                         <th style="width:160px;">Actions</th>
@@ -102,7 +102,9 @@ table.dataTable thead th {
                                             </a>
                                         </td>
                                         <td><?php echo (int)$row['nbreEnfant']; ?></td>
-                                        <td><?php echo number_format((float)$row['montantAPayer'], 2, ',', ' '); ?>$
+                                        <td>
+                                            <span class="badge badge-primary"><?php echo number_format((float)$row['montantAPayer'], 2, ',', ' '); ?> $</span>
+                                            <span class="badge badge-success"><?php echo number_format((float)$row['montantAPayerFC'], 2, ',', ' '); ?> $</span>
                                         </td>
                                         <td><?php echo e($row['telephone']); ?></td>
                                         <td><?php echo e($row['avenue']); ?>, <?php echo e($row['numero']); ?>,

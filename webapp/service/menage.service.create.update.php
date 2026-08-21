@@ -30,7 +30,7 @@ if (isset($_POST['submit']) || isset($_POST['submit_continue'])) {
   
   // Correction ici : "ssssssssssdss" (13 caractères pour 13 variables)
   $stmt->bind_param(
-    "ssssssssssdss", 
+    "sssssssssssss", 
     $noms, $nom_du_pere, $nom_de_la_mere, $profesion, $telephone, $numero, $avenue, 
     $quartier, $commune, $province, $annee_scolaire, $montantAPayer, $email
   );
