@@ -96,26 +96,27 @@ while ($r = $rstEleve->fetch_assoc()) $eleves[] = $r;
 $stE->close();
 
 /* ===================== Référence “Montant à payer (divers)” ===================== */
-$diversAPayerRef = 0.0;
-if (!empty($eleves)) {
-  $sqlDiversRef = "
-    SELECT COALESCE(SUM(s2.montant),0) AS total_divers_tarif
-    FROM eleve e
-    JOIN classe cl ON e.classe = cl.id
-    JOIN cycle  cy ON cl.cycle  = cy.id
-    JOIN scolarite s2 ON s2.cycle = cy.id
-    WHERE e.menage = ?
-      AND (LOWER(s2.description) LIKE '%diver%' OR LOWER(s2.description) LIKE '%connex%')
-  ";
-  $stDR = $con->prepare($sqlDiversRef);
-  $stDR->bind_param('i', $id);
-  $stDR->execute();
-  $rsDR = $stDR->get_result();
-  if ($row = $rsDR->fetch_assoc()) {
-    $diversAPayerRef = (float)$row['total_divers_tarif'];
-  }
-  $stDR->close();
-}
+$diversAPayerRef = (float)$montantAPayerFC;
+// $diversAPayerRef = 0.0;
+// if (!empty($eleves)) {
+//   $sqlDiversRef = "
+//     SELECT COALESCE(SUM(s2.montant),0) AS total_divers_tarif
+//     FROM eleve e
+//     JOIN classe cl ON e.classe = cl.id
+//     JOIN cycle  cy ON cl.cycle  = cy.id
+//     JOIN scolarite s2 ON s2.cycle = cy.id
+//     WHERE e.menage = ?
+//       AND (LOWER(s2.description) LIKE '%diver%' OR LOWER(s2.description) LIKE '%connex%')
+//   ";
+//   $stDR = $con->prepare($sqlDiversRef);
+//   $stDR->bind_param('i', $id);
+//   $stDR->execute();
+//   $rsDR = $stDR->get_result();
+//   if ($row = $rsDR->fetch_assoc()) {
+//     $diversAPayerRef = (float)$row['total_divers_tarif'];
+//   }
+//   $stDR->close();
+// }
 
 /* ===================== A PAYER PAR TRANCHE ===================== */
 $apayerByTranche = [];   
@@ -327,10 +328,10 @@ $rstsDivers = $stPD->get_result();
                                                     <td>
                                                         <span
                                                             class="badge bg-primary"><?= h($rowEleve['montant_a_payer']) ?>
-                                                            USD</span>
+                                                            $</span>
                                                         <span
                                                             class="badge bg-success"><?= h($rowEleve['montantAPayerFC']) ?>
-                                                            USD</span>
+                                                            $</span>
                                                     </td>
                                                     <td><a href="../eleve/detail_eleve.php?id=<?= (int)$rowEleve['id']; ?>"
                                                             class="btn btn-secondary btn-sm">Voir</a>
@@ -485,8 +486,9 @@ $rstsDivers = $stPD->get_result();
                                         <table class="table" id="myTablePaieScol">
                                             <thead>
                                                 <tr>
-                                                    <th>Reçu</th>
-                                                    <th>Montant payé</th>
+                                                    <th>N° Reçu</th>
+                                                    <th>A payer</th>
+                                                    <th>Payé</th>
                                                     <th>Solde</th>
                                                     <th>Obs.</th>
                                                     <th>Date paiement</th>
@@ -506,9 +508,9 @@ $rstsDivers = $stPD->get_result();
                                                     $toggleId = "detail-paiement-scol-".$paiementId;
                                                 ?>
                                                 <tr>
-                                                    <td><?= $paiementId ?><button
-                                                            class="d-none btn btn-sm btn-secondary toggle-btn"
-                                                            data-toggle="#<?= h($toggleId) ?>">▼</button></td>
+                                                    <td><a href="../encaissement/api/apercu_recu.php?ordre=<?= $paiementId ?>"
+                                                            class="text-danger" target="_blank"><?= $paiementId ?></a></td>
+                                                    <td><?= fmt($row['montantAPayer']) ?> $</td>
                                                     <td><?= fmt($row['montantPayer']) ?> $</td>
                                                     <td><?= fmt($row['resteAPayer']) ?> $</td>
                                                     <td><?= h($row['observation']) ?></td>
@@ -600,8 +602,10 @@ $rstsDivers = $stPD->get_result();
                                         <table class="table" id="myTablePaieDivers">
                                             <thead>
                                                 <tr>
-                                                    <th>Reçu</th>
-                                                    <th>Montant payé</th>
+                                                    <th>N°Reçu</th>
+                                                    <th>A payer</th>
+                                                    <th>Payé</th>
+                                                    <th class="text-danger">Solde</th>
                                                     <th>Obs.</th>
                                                     <th>Date paiement</th>
                                                     <th></th>
@@ -621,10 +625,13 @@ $rstsDivers = $stPD->get_result();
                                                     $toggleId = "detail-paiement-divers-".$pdId;
                                                 ?>
                                                 <tr>
-                                                    <td><?= $pdId ?><button
-                                                            class="d-none btn btn-sm btn-secondary toggle-btn"
-                                                            data-toggle="#<?= h($toggleId) ?>">▼</button></td>
+                                                    <td class="text-danger">
+                                                        <a href="../encaissement/api/apercu_recu_divers.php?ordre=<?= $pdId ?>"
+                                                            class="text-danger" target="_blank"><?= $pdId ?></a>
+                                                    </td>
+                                                    <td><?= fmt($row['montantAPayer']) ?> $</td>
                                                     <td><?= fmt($row['montantPayer']) ?> $</td>
+                                                    <td class="text-danger"><?= fmt($row['resteAPayer']) ?> $</td>
                                                     <td><?= h($row['observation']) ?></td>
                                                     <td><?= h($row['dateCreated']) ?></td>
                                                     <td><a href="../encaissement/api/apercu_recu_divers.php?ordre=<?= $pdId ?>"

@@ -13,7 +13,7 @@ function fmt($n){ return number_format((float)$n, 2, '.', ' '); }
 /* ================= Requête de base — ménages ================= */
 $sqlMenages = "
   SELECT 
-    men.id, men.noms, men.anneeScolaire, men.montantAPayer,
+    men.id, men.noms, men.anneeScolaire, men.montantAPayer, men.montantAPayerFC,
     men.start_tranche,
     (SELECT COUNT(*) FROM eleve e WHERE e.menage = men.id) AS nbreEnfant,
     (SELECT COALESCE(SUM(p.montantPayer),0) FROM paiement p WHERE p.menage = men.id) AS montantDejaPayerScol,
@@ -51,21 +51,15 @@ function fetch_eleves_cycles(mysqli $con, int $menageId): array {
 
 /** Montant “divers de référence” (tarifs scolarite/cycle de l’année ménage : description LIKE diver/connex) */
 function fetch_divers_ref(mysqli $con, int $menageId): float {
-  $sql = "
-    SELECT COALESCE(SUM(s2.montant),0) AS total_divers_tarif
-    FROM eleve e
-    JOIN classe cl ON e.classe = cl.id
-    JOIN cycle  cy ON cl.cycle  = cy.id
-    JOIN scolarite s2 ON s2.cycle = cy.id
-    WHERE e.menage = ?
-      AND (LOWER(s2.description) LIKE '%diver%' OR LOWER(s2.description) LIKE '%connex%')
-  ";
+  $sql = "SELECT COALESCE(montantAPayerFC, 0) AS total_divers FROM menage WHERE id = ?";
   $st = $con->prepare($sql);
   $st->bind_param('i', $menageId);
   $st->execute();
   $rs = $st->get_result();
   $val = 0.0;
-  if ($row = $rs->fetch_assoc()) $val = (float)$row['total_divers_tarif'];
+  if ($row = $rs->fetch_assoc()) {
+    $val = (float)$row['total_divers'];
+  }
   $st->close();
   return $val;
 }
@@ -404,8 +398,8 @@ if (isset($_GET['export']) && $_GET['export']==1) {
                                             $grandRestByTranche[$n] += $rest;
                                         ?>
                                         <td class="text-end">
-                                            <?= fmt($pay) ?> / <?= fmt($due) ?> <span
-                                                class="text-danger">(<?= fmt($rest) ?>)</span>
+                                            <?= fmt($pay) ?> $/ <?= fmt($due) ?> $<span class="text-danger">
+                                                (<?= fmt($rest) ?> $)</span>
                                         </td>
                                         <?php endforeach; ?>
 
@@ -428,9 +422,9 @@ if (isset($_GET['export']) && $_GET['export']==1) {
 
                                         <?php foreach ($colsToShow as $n): ?>
                                         <td class="text-end text-light">
-                                            <?= fmt($grandPaidByTranche[$n]) ?> /
-                                            <?= fmt($grandDueByTranche[$n]) ?>
-                                            (<?= fmt($grandRestByTranche[$n]) ?>)
+                                            <?= fmt($grandPaidByTranche[$n]) ?> $/
+                                            <?= fmt($grandDueByTranche[$n]) ?> $
+                                            (<?= fmt($grandRestByTranche[$n]) ?> $)
                                         </td>
                                         <?php endforeach; ?>
 
