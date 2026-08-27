@@ -3,11 +3,14 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
+require_once('../../layouts/constants/head.php'); 
+require_once('../../layouts/navbar/navbar.php');
+
 require_once('../../webapp/database/config.php'); // $con (mysqli)
 require_once('../../webapp/service/annee_scolaire.encours.php'); // $annee_scolaire
 
 mysqli_set_charset($con, 'utf8mb4');
-session_start();
+// session_start();
 
 if (!$con) {
     die("Erreur de connexion à la base de données");
@@ -205,24 +208,22 @@ $sql_attente = "
 $resultats = mysqli_query($con, $sql_attente);
 $nb_attente = ($resultats instanceof mysqli_result) ? mysqli_num_rows($resultats) : 0;
 ?>
-<!DOCTYPE html>
-<html lang="fr">
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Extraction des Nouvelles Inscriptions</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-</head>
+<div class="main-panel-copy">
+    <div class="content-wrapper">
 
-<body class="bg-light">
-    <div class="container py-5">
-        <div class="row mb-4">
+        <div class="row">
             <div class="col-md-12">
                 <div class="d-flex justify-content-between align-items-center bg-white p-3 rounded shadow-sm">
-                    <h3 class="mb-0 text-primary"><i class="fas fa-user-plus me-2"></i> Extraire & Valider les Inscriptions</h3>
-                    <span class="badge bg-warning text-dark fs-6"><?= $nb_attente ?> en attente</span>
+                    <div>
+                        <h3 class="mb-0 text-primary"><i class="fas fa-user-plus me-2"></i> Extraire & Valider les
+                            Inscriptions</h3>
+                        <br><span class="badge bg-warning text-dark fs-6"><?= $nb_attente ?> en attente</span>
+                    </div>
+                    <div><a href="list_nouvelle_famille_inscrite.php" class="btn btn-success">
+                            <i class="mdi mdi-file-export me-1"></i> Nouveaux inscrits
+                        </a></div>
+
                 </div>
             </div>
         </div>
@@ -245,78 +246,85 @@ $nb_attente = ($resultats instanceof mysqli_result) ? mysqli_num_rows($resultats
         <?php endif; ?>
 
         <!-- Table des fiches à extraire -->
-        <div class="card border-0 shadow-sm">
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Code Famille</th>
-                                <th>Élève</th>
-                                <th>Genre / Nat. / Naissance</th>
-                                <th>Classe demandée</th>
-                                <th>Responsable (Père / Mère)</th>
-                                <th>Province</th>
-                                <th class="text-center">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php if ($nb_attente > 0): ?>
-                            <?php while ($row = mysqli_fetch_assoc($resultats)): ?>
-                            <tr>
-                                <td>
-                                    <span class="badge bg-secondary"><?= htmlspecialchars($row['code_famille'] ?? '') ?></span>
-                                </td>
-                                <td>
-                                    <strong><?= htmlspecialchars(($row['nom'] ?? '') . ' ' . ($row['postnom'] ?? '')) ?></strong><br>
-                                    <small class="text-muted"><?= htmlspecialchars($row['prenom'] ?? '') ?></small>
-                                </td>
-                                <td>
-                                    <span class="badge bg-info text-dark"><?= htmlspecialchars($row['genre'] ?? '') ?></span>
-                                    <small class="badge bg-light text-dark border"><?= htmlspecialchars($row['nationalite'] ?? 'CONGOLAISE') ?></small><br>
-                                    <small class="text-muted"><?= !empty($row['date_naissance']) ? date('d/m/Y', strtotime($row['date_naissance'])) : '-' ?></small>
-                                </td>
-                                <td>
-                                    <strong class="text-dark"><?= htmlspecialchars($row['classe'] ?? '') ?></strong><br>
-                                    <small class="text-muted"><?= htmlspecialchars($row['option_etude'] ?? '') ?></small>
-                                </td>
-                                <td>
-                                    <i class="fas fa-user-tie text-muted me-1"></i><strong><?= htmlspecialchars($row['resp_nom'] ?? '') ?></strong><br>
-                                    <small class="text-muted">P: <?= htmlspecialchars($row['resp_nom_pere'] ?? 'N/A') ?> | M: <?= htmlspecialchars($row['resp_nom_mere'] ?? 'N/A') ?></small><br>
-                                    <small class="text-muted"><i class="fas fa-phone me-1"></i><?= htmlspecialchars($row['resp_tel1'] ?? '') ?></small>
-                                </td>
-                                <td>
-                                    <span class="badge bg-outline-primary text-primary border border-primary">
-                                        <?= htmlspecialchars($row['resp_province'] ?? 'N/A') ?>
-                                    </span>
-                                </td>
-                                <td class="text-center">
-                                    <form method="POST" onsubmit="return confirm('Voulez-vous valider cette inscription et ouvrir la fiche du ménage ?');">
-                                        <input type="hidden" name="action" value="valider_inscription">
-                                        <input type="hidden" name="inscription_id" value="<?= $row['id'] ?>">
-                                        <button type="submit" class="btn btn-success btn-sm px-3 fw-bold">
-                                            <i class="fas fa-file-export me-1"></i> Extraire
-                                        </button>
-                                    </form>
-                                </td>
-                            </tr>
-                            <?php endwhile; ?>
-                            <?php else: ?>
-                            <tr>
-                                <td colspan="7" class="text-center py-4 text-muted">
-                                    <i class="fas fa-inbox fa-2x mb-2 d-block"></i>
-                                    Aucune nouvelle demande d'inscription en attente d'extraction.
-                                </td>
-                            </tr>
-                            <?php endif; ?>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+        <div class="table-responsive mt-4">
+            <table class="table table-responsive align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Code Famille</th>
+                        <th>Élève</th>
+                        <th>Genre / Nat. / Naissance</th>
+                        <th>Classe demandée</th>
+                        <th>Responsable (Père / Mère)</th>
+                        <th>Province</th>
+                        <th class="text-center">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php if ($nb_attente > 0): ?>
+                    <?php while ($row = mysqli_fetch_assoc($resultats)): ?>
+                    <tr>
+                        <td>
+                            <span class="badge bg-secondary text-dark"><?= htmlspecialchars($row['code_famille'] ?? '') ?></span>
+                        </td>
+                        <td>
+                            <strong><?= htmlspecialchars(($row['nom'] ?? '') . ' ' . ($row['postnom'] ?? '')) ?></strong><br>
+                            <small class="text-muted"><?= htmlspecialchars($row['prenom'] ?? '') ?></small>
+                        </td>
+                        <td>
+                            <span class="badge bg-info text-white"><?= htmlspecialchars($row['genre'] ?? '') ?></span>
+                            <small
+                                class="badge bg-primary text-white"><?= htmlspecialchars($row['nationalite'] ?? 'CONGOLAISE') ?></small><br>
+                            <small
+                                class="text-muted"><?= !empty($row['date_naissance']) ? date('d/m/Y', strtotime($row['date_naissance'])) : '-' ?></small>
+                        </td>
+                        <td>
+                            <strong class="text-dark"><?= htmlspecialchars($row['classe'] ?? '') ?></strong><br>
+                            <small class="text-muted"><?= htmlspecialchars($row['option_etude'] ?? '') ?></small>
+                        </td>
+                        <td>
+                            <i
+                                class="fas fa-user-tie text-muted me-1"></i><strong><?= htmlspecialchars($row['resp_nom'] ?? '') ?></strong><br>
+                            <small class="text-muted">P: <?= htmlspecialchars($row['resp_nom_pere'] ?? 'N/A') ?>
+                                | M: <?= htmlspecialchars($row['resp_nom_mere'] ?? 'N/A') ?></small><br>
+                            <small class="text-muted"><i
+                                    class="fas fa-phone me-1"></i><?= htmlspecialchars($row['resp_tel1'] ?? '') ?></small>
+                        </td>
+                        <td>
+                            <span class="badge bg-primary text-white border border-primary">
+                                <?= htmlspecialchars($row['resp_province'] ?? 'N/A') ?>
+                            </span>
+                        </td>
+                        <td class="text-center">
+                            <form method="POST"
+                                onsubmit="return confirm('Voulez-vous valider cette inscription et ouvrir la fiche du ménage ?');">
+                                <input type="hidden" name="action" value="valider_inscription">
+                                <input type="hidden" name="inscription_id" value="<?= $row['id'] ?>">
+                                <button type="submit" class="btn btn-success btn-sm px-3 fw-bold">
+                                    <i class="fas fa-file-export me-1"></i> Extraire
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    <?php endwhile; ?>
+                    <?php else: ?>
+                    <tr>
+                        <td colspan="7" class="text-center py-4 text-muted">
+                            <i class="fas fa-inbox fa-2x mb-2 d-block"></i>
+                            Aucune nouvelle demande d'inscription en attente d'extraction.
+                        </td>
+                    </tr>
+                    <?php endif; ?>
+                </tbody>
+            </table>
         </div>
-    </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    </div>
+</div>
+
+
+
+<!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script> -->
+<?php require_once('../../layouts/constants/footer.php'); ?>
 </body>
 
 </html>

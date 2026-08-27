@@ -49,6 +49,9 @@ table.dataTable thead th {
                                 <a href="../eleve/" class="btn btn-dark">Gest. élève</a>
                                 <a href="menage_douteux.php" class="btn btn-primary">Liste des familles douteuses</a>
                                 <a href="../controle/" class="btn btn-danger">Situation financière des familles</a>
+                                 <a href="../other/extraire_inscription.php" class="btn btn-outline-success">
+                                    <i class="mdi mdi-file-export me-1"></i> Gest. de l'inscription
+                                </a>
                             </div>
                             <div class="ms-auto" style="min-width:280px;">
                                 <input type="text" class="form-control" id="globalSearch"
