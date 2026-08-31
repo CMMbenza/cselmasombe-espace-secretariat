@@ -124,28 +124,28 @@ require_once('../../layouts/navbar/navbar.php');
                         <!-- LIGNE 1 -->
                         <div class="row quick-actions g-3">
 
-                            <div class="col-12 col-md-6 col-lg-3">
+                            <!-- <div class="col">
                                 <a class="btn btn-outline-success w-100" href="../balance/">
                                     <span class="menu-icon finances"><i class="mdi mdi-cash"></i></span>
                                     Caisse centrale
                                 </a>
                             </div>
 
-                            <div class="col-12 col-md-6 col-lg-3">
+                            <div class="col">
                                 <a class="btn btn-outline-primary w-100" href="../caisse/">
                                     <span class="menu-icon finances"><i class="mdi mdi-wallet"></i></span>
                                     Caisse scolaire / connexes
                                 </a>
-                            </div>
+                            </div> -->
 
-                            <div class="col-12 col-md-6 col-lg-3">
+                            <div class="col">
                                 <a class="btn btn-outline-danger w-100" href="../report/">
                                     <span class="menu-icon report"><i class="mdi mdi-file-chart"></i></span>
                                     Rapports
                                 </a>
                             </div>
 
-                            <div class="col-12 col-md-6 col-lg-3">
+                            <div class="col">
                                 <a class="btn btn-outline-warning w-100"
                                     href="../ventilation_de_caisse/">
                                     <span class="menu-icon chart"><i class="mdi mdi-chart-pie"></i></span>
@@ -153,65 +153,63 @@ require_once('../../layouts/navbar/navbar.php');
                                 </a>
                             </div>
 
-                        </div>
+                         
 
-                        <!-- LIGNE 2 -->
-                        <div class="row quick-actions g-3 mt-2">
+                        <!-- LIGNE 2 --> 
 
-                            <div class="col-12 col-md-6 col-lg-3">
+                            <div class="col">
                                 <a class="btn btn-outline-warning w-100" href="../statisque_inventaire/">
                                     <span class="menu-icon chart"><i class="mdi mdi-chart-donut"></i></span>
                                     Statisque inventaire
                                 </a>
                             </div>
 
-                            <div class="col-12 col-md-6 col-lg-3">
+                            <div class="col">
                                 <a class="btn btn-outline-danger w-100" href="../controle/">
                                     <span class="menu-icon security"><i class="mdi mdi-shield-check"></i></span>
                                     Contrôle frais FS/FC
                                 </a>
                             </div>
 
-                            <div class="col-12 col-md-6 col-lg-3">
+                            <div class="col">
                                 <a class="btn btn-outline-primary w-100" href="../classe/">
                                     <span class="menu-icon school"><i class="mdi mdi-school"></i></span>
                                     Classes / cycles
                                 </a>
                             </div>
 
-                            <div class="col-12 col-md-6 col-lg-3">
+                            <div class="col">
                                 <a class="btn btn-outline-warning w-100" href="../fixation_frais/">
                                     <span class="menu-icon finances"><i class="mdi mdi-currency-usd"></i></span>
                                     Fixation frais
                                 </a>
                             </div>
 
-                        </div>
+                        
 
-                        <!-- LIGNE 3 -->
-                        <div class="row quick-actions g-3 mt-2">
+                        
 
-                            <div class="col-12 col-md-6 col-lg-3">
+                            <div class="col">
                                 <a class="btn btn-dark w-100" href="../prestation/">
                                     <span class="menu-icon calendar"><i class="mdi mdi-calendar-check"></i></span>
                                     Présences
                                 </a>
                             </div>
 
-                            <div class="col-12 col-md-6 col-lg-3">
+                            <div class="col">
                                 <a class="btn btn-danger w-100" href="../annee_scolaire/">
                                     <span class="menu-icon calendar"><i class="mdi mdi-calendar"></i></span>
                                     Année scolaire
                                 </a>
                             </div>
 
-                            <div class="col-12 col-md-6 col-lg-3">
+                            <div class="col">
                                 <a class="btn btn-secondary w-100" href="../archivage/">
                                     <span class="menu-icon archive"><i class="mdi mdi-archive"></i></span>
                                     Archivage des données
                                 </a>
                             </div>
-                            <div class="col-12 col-md-6 col-lg-3">
+                            <div class="col">
                                 <a class="btn btn-secondary w-100" href="../archivage/reinscription.php">
                                     <span class="menu-icon archive"><i class="mdi mdi-archive"></i></span>
                                     Réinscription

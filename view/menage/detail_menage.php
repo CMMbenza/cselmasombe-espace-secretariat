@@ -232,14 +232,21 @@ $rstsDivers = $stPD->get_result();
                     <div class="card">
                         <div class="card-body">
                             <h5 class="card-title text-uppercase d-flex align-items-center justify-content-between">
-                                <span>Détails sur la famille (Ménage)</span>
-                                <div class="d-flex">
-                                    <button type="button" class="btn btn-secondary me-2" onclick="history.back()">&lt;
-                                        Retour</button>
-                                    <a href="create-update.php?id=<?php echo (int)$row['id']; ?>"
-                                        class="btn btn-primary btn-sm">Modifier</a>
-                                </div>
+                                <span>Détails sur la famille (Ménage)</span>                                
                             </h5>
+                            <div class="d-flex align-items-center gap-1">
+                                    <button type="button" class="btn btn-secondary btn-sm me-1"
+                                        onclick="history.back()">
+                                        &lt; Retour
+                                    </button>
+                                    <a href="create-update.php?id=<?= $id ?>" class="btn btn-primary btn-sm me-1">
+                                        Modifier
+                                    </a>
+                                    <a href="fiche_famille_word.php?id=<?= $id ?>" class="btn btn-success btn-sm"
+                                        target="_blank">
+                                        <i class="mdi mdi-file-word"></i> Télécharger fiche famille (docs)
+                                    </a>
+                                </div>
                             <hr>
                             <dl class="row-md jh-entity-details">
                                 <dt>Nom de la famille</dt>
@@ -509,7 +516,8 @@ $rstsDivers = $stPD->get_result();
                                                 ?>
                                                 <tr>
                                                     <td><a href="../encaissement/api/apercu_recu.php?ordre=<?= $paiementId ?>"
-                                                            class="text-danger" target="_blank"><?= $paiementId ?></a></td>
+                                                            class="text-danger" target="_blank"><?= $paiementId ?></a>
+                                                    </td>
                                                     <td><?= fmt($row['montantAPayer']) ?> $</td>
                                                     <td><?= fmt($row['montantPayer']) ?> $</td>
                                                     <td><?= fmt($row['resteAPayer']) ?> $</td>
